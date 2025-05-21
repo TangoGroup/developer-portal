@@ -1,0 +1,425 @@
+---
+title: Web Standards
+description: Engineering Standards and Best Practices for Web Application Development
+published: true
+toc:
+  visible: true
+icon: code
+date: 2025-01-10
+---
+
+## 1. TypeScript and Strict Mode
+
+- Use TypeScript in strict mode for all projects.
+- Enable strict mode:
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "strict": true
+  }
+}
+```
+
+```tsx
+// next.config.ts
+const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  ...
+```
+
+Reference: [TypeScript Documentation](https://www.typescriptlang.org/tsconfig#strict)
+
+## 2. Next.js App Router
+
+- Use the Next.js App Router for all new projects.
+- Implement file-based routing using the `/app` directory.
+
+Example directory structure:
+
+```
+app/
+├── layout.tsx
+├── page.tsx
+├── about/
+│   └── page.tsx
+└── blog/
+    ├── [slug]/
+    │   └── page.tsx
+    └── page.tsx
+```
+
+Reference: [Next.js App Router Documentation](https://nextjs.org/docs/app/building-your-application/routing)
+
+## 3. React Server Components and Data Fetching
+
+- Prefer React Server Components (RSC) over Client Components when possible.
+- Use RSC for data fetching to improve performance and reduce client-side JavaScript.
+
+Example of data fetching in a Server Component:
+
+```tsx
+async function BlogPosts() {
+  const posts = await fetchBlogPosts()
+  return (
+    <ul>
+      {posts.map((post) => (
+        <li key={post.id}>{post.title}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+Reference: [React Server Components and Data Fetching](https://nextjs.org/docs/app/building-your-application/data-fetching/fetching)
+
+## 4. UI and Styling
+
+- Use shadcn/ui as the primary UI component library.
+- Implement custom styling with Tailwind CSS.
+- Use the `@/components/ui` directory for all shadcn/ui components. These components copied from shadcn/ui are not to be modified. Use tailwind classes to style them, and or create new components based on the copied component and colocated appropriately.
+- Develop responsive components with Tailwind CSS. Mobile first.
+
+Example of a shadcn/ui component with Tailwind CSS:
+
+```tsx
+import { Button } from '@/components/ui/button'
+
+export function MyComponent() {
+  return <Button className="bg-blue-500 hover:bg-blue-600">Click me</Button>
+}
+```
+
+References:
+
+- [shadcn/ui Documentation](https://ui.shadcn.com/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+
+## 5. Database and ORM
+
+- Use PostgreSQL as the primary database, hosted on Supabase.
+- Use Prisma or Drizzle as the ORM for database interactions.
+
+References:
+
+- [Supabase Documentation](https://supabase.com/docs)
+- [Prisma Documentation](https://www.prisma.io/docs/orm)
+- [Drizzle Documentation](https://orm.drizzle.team/docs/overview)
+
+## 6. File and Component Conventions
+
+- Use lowercase with dashes for file naming (e.g., `my-component.tsx`).
+- Do not use the `src` directory; place files / directories directly in the project root.
+- Colocate components in `_components` directories close to their routes if they are not shared across multiple routes.
+
+Example directory structure:
+
+```
+app/
+├── blog/
+│   ├── _components/
+│   │   └── post-card.tsx
+│   └── page.tsx
+└── page.tsx
+```
+
+## 7. Server Actions and Server-Only Code
+
+- Use Server Actions for form submissions and data mutations.
+- Implement the `server-only` package in server-side code, including Server Actions.
+
+Example of a Server Action:
+
+```tsx
+'use server'
+
+import 'server-only'
+
+export async function updateUserAction(formData: FormData) {
+  // Process form data, validate with zod
+}
+```
+
+Reference: [Server Actions Documentation](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions)
+
+## 8. Client-Side Promise Resolution
+
+- Use `use` for resolving client-side promises.
+- Avoid using `useEffect` for data fetching.
+
+Example using `use`:
+
+```tsx
+'use client'
+
+import { Suspense, use } from 'react'
+import { getData } from '@/lib/service'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorBoundary } from '@/components/error-boundary'
+
+function NetworkNameMessage({
+  dataPromise,
+}: {
+  dataPromise: Promise<Awaited<ReturnType<typeof getData>>>
+}) {
+  const data = use(dataPromise)
+
+  return <p className="text-sm pb-2">{data.organization.name}</p>
+}
+
+export function ClientComponent() {
+  return (
+    <ErrorBoundary
+      fallback={<p className="text-sm text-destructive">Unable to load data</p>}
+    >
+      <Suspense fallback={<Skeleton className="w-full h-5 pb-2" />}>
+        <NetworkNameMessage dataPromise={getData()} />
+      </Suspense>
+    </ErrorBoundary>
+  )
+}
+```
+
+Reference: [use Documentation](https://react.dev/reference/react/use)
+
+## 9. Error Reporting and Analytics
+
+- Use Sentry for error reporting.
+- Implement PostHog for analytics.
+
+References:
+
+- [Sentry Next.js Documentation](https://docs.sentry.io/platforms/javascript/guides/nextjs/)
+- [PostHog Documentation](https://posthog.com/docs)
+
+## 10. Deployment and Preview
+
+- Deploy applications to Vercel.
+- Utilize preview deployments for pull requests.
+
+Reference: [Vercel Deployment Documentation](https://vercel.com/docs/deployments/overview)
+
+## 11. Git and Pull Requests
+
+- Create small, concise pull requests focused on specific features or fixes.
+- Use descriptive commit messages and PR descriptions.
+
+Example commit message:
+
+```
+feat(auth): implement OAuth2 login with Google provider
+```
+
+## 12. Authentication
+
+- Use NextAuth v5, Clerk, or Supabase for authentication.
+- Avoid password-based authentication; prefer OTP and/or OAuth2 providers.
+
+References:
+
+- [NextAuth v5 Migration Guide](https://authjs.dev/getting-started/migrating-to-v5)
+- [Clerk Documentation](https://clerk.com/docs)
+- [Supabase Auth Documentation](https://supabase.com/docs/guides/auth)
+
+## 13. Programming Patterns
+
+- Use functional and declarative programming patterns.
+- Prefer named exports for components.
+- Use descriptive variable names with auxiliary verbs.
+- Use the `function` keyword for pure functions.
+
+Example:
+
+```tsx
+// Component
+export function ProductList({ items }: { items: Item[] }) {
+  function calculateTotalPrice(items: Item[]): number {
+    return items.reduce((total, item) => total + item.price, 0)
+  }
+
+  return (
+    <div>
+      <p>Total price: {calculateTotalPrice(items)}</p>
+      <ul>
+        {items.map((item) => (
+          <li key={item.id}>{item.name}</li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+// Page component (RSC)
+export default function Page({ items }: { items: Item[] }) {
+  return <ProductList items={items} />
+}
+```
+
+## 14. Code Quality and Linting
+
+- Use `eslint-config-next` for Next.js specific linting rules.
+- Implement `eslint-config-prettier` to avoid conflicts with Prettier.
+- Sort imports with `@ianvs/prettier-plugin-sort-imports`.
+- Use `eslint-plugin-tailwindcss` for Tailwind CSS linting.
+
+Example `.eslintrc.js`:
+
+```js
+module.exports = {
+  extends: [
+    'next/core-web-vitals',
+    'prettier',
+    'plugin:tailwindcss/recommended',
+  ],
+  plugins: ['@ianvs/prettier-plugin-sort-imports'],
+}
+```
+
+## 15. Testing
+
+- Use Vitest for unit and integration testing.
+- Implement Playwright for end-to-end testing.
+
+References:
+
+- [Vitest Documentation](https://vitest.dev/guide/)
+- [Playwright Documentation](https://playwright.dev/docs/intro)
+
+## 16. Environment Variables
+
+- Manage environment variables with Vercel.
+- Use `.env.local` for local development.
+
+Reference: [Vercel Environment Variables Documentation](https://vercel.com/docs/projects/environment-variables)
+
+## 17. Package Management
+
+- Use pnpm as the package manager.
+
+Example installation command:
+
+```bash
+pnpm install
+```
+
+Reference: [pnpm Documentation](https://pnpm.io/motivation)
+
+## 18. Performance Monitoring
+
+- Regularly measure and optimize Lighthouse scores.
+- Use Vercel Analytics for real-time performance monitoring.
+
+Reference: [Vercel Web Analytics Documentation](https://vercel.com/docs/analytic)
+
+## 19. Development Tools
+
+- Use v0 AI assistant for code generation and problem-solving.
+- Utilize Cursor editor for enhanced development experience.
+
+## 20. Email Delivery
+
+- Use SendGrid or Resend for email delivery.
+
+References:
+
+- [SendGrid Documentation](https://www.twilio.com/docs/sendgrid)
+- [Resend Documentation](https://resend.com/docs/introduction)
+
+## 21. Image Optimization
+
+- Use Cloudflare and Next.js Image component for image optimization.
+- Prefer WebP format for images when possible.
+
+Example usage of Next.js Image component:
+
+```tsx
+import Image from 'next/image'
+
+export function OptimizedImage() {
+  return (
+    <Image
+      src="/path/to/image.webp"
+      alt="Optimized image"
+      width={500}
+      height={300}
+    />
+  )
+}
+```
+
+Reference: [Next.js Image Optimization](https://nextjs.org/docs/app/building-your-application/optimizing/images)
+
+## 22. Performance Optimization
+
+- Use Suspense and Error Boundaries to improve Time to First Byte (TTFB) performance.
+
+Example usage:
+
+```tsx
+import { Suspense } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
+
+function MyComponent() {
+  return (
+    <ErrorBoundary fallback={<ErrorComponent />}>
+      <Suspense fallback={<LoadingSpinner />}>
+        <DataComponent />
+      </Suspense>
+    </ErrorBoundary>
+  )
+}
+```
+
+Reference: [React Suspense Documentation](https://react.dev/reference/react/Suspense)
+
+## 23. Route Organization
+
+- Use route groups to better organize and allow for multiple root layouts.
+
+Example directory structure:
+
+```
+app/
+├── (marketing)
+│   ├── about/
+│   │   └── page.tsx
+│   └── page.tsx
+├── (shop)
+│   ├── products/
+│   │   └── page.tsx
+│   └── cart/
+│       └── page.tsx
+└── layout.tsx
+```
+
+Reference: [Next.js Route Groups](https://nextjs.org/docs/app/building-your-application/routing/route-groups)
+
+## 24. Documentation
+
+- Maintain an up-to-date README.md file in the repository root.
+- Include setup instructions, development guidelines, and important links in the README.
+
+Example README.md structure:
+
+```md
+# Project Name
+
+Brief project description
+
+## Getting Started
+
+Installation and setup instructions
+
+## Development
+
+Guidelines for development, including coding standards and best practices
+
+## Deployment
+
+Instructions for deploying the application
+
+## Contributing
+
+How to contribute to the project
+```
