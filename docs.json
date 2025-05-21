@@ -24,6 +24,7 @@
           {
             "group": "Essentials",
             "pages": [
+              "essentials/web-standards",
               "essentials/markdown",
               "essentials/code",
               "essentials/images",
@@ -51,6 +52,30 @@
               "api-reference/endpoint/delete",
               "api-reference/endpoint/webhook"
             ]
+          },
+          {
+            "group": "Accounts",
+            "openapi": {
+              "source": "api-reference/accounts/accounts.yaml"
+            }
+          },
+          {
+            "group": "Impact",
+            "openapi": {
+              "source": "api-reference/impact/impact-public-api-openapi.yaml"
+            }
+          },
+          {
+            "group": "AI",
+            "openapi": {
+              "source": "api-reference/ai/aiapiopenapi.json"
+            }
+          },
+          {
+            "group": "Data Engine",
+            "openapi": {
+              "source": "api-reference/data-engine/deopenapi.json"
+            }
           }
         ]
       }
