@@ -102,6 +102,13 @@
               "docs/ai/benchmarking",
               "docs/ai/our-llm"
             ]
+          },
+          {
+            "group": "External",
+            "icon": "arrow-up-right-from-square",
+            "pages": [
+              "faithstack"
+            ]
           }
         ]
       },
