@@ -1,0 +1,168 @@
+---
+title: "Real Time Ingestion"
+---
+
+# Real-Time Content Ingestion API Guide
+
+The Real-Time Ingestion API allows developers to upload text content directly for immediate processing and vectorization. Unlike batch upload methods, this API processes content in real-time, making it suitable for dynamic content that needs to be immediately available for search or retrieval.
+
+## API Endpoint
+
+POST /ingestion/v1/real\_time\_upload
+
+Base URL: [https://platform.ai.gloo.com](https://platform.ai.gloo.com)
+
+## Authentication
+
+The API requires a JWT token with specific claims to authorize access.
+
+The token must be associated with an Client ID that has access to the specified publisher. The system validates that the organization associated with your Client ID has permission to access the publisher specified in your request.
+
+### Headers
+
+Authorization: Bearer \<your\_access\_token> Content-Type: application/json
+
+### JWT Token Requirements
+
+Your JWT token must include:
+
+* A `sub` claim containing your API client ID
+
+  * A `scope` claim that includes `api/access`
+
+    The API client must be associated with an API key that belongs to the same organization as the publisher you're uploading content for.
+
+<Info />
+
+## Request Body
+
+The request body should be a JSON object with the following structure:
+
+<CodeGroup>
+  ```bash bash
+  {
+    "content": "This is the full text content that needs to be processed and indexed for search. It can be as long as needed to represent the document content.",
+    "filename": "sample_document_name.txt",
+    "producer_id": "producer-123",
+    "publisher_id": "550e8400-e29b-41d4-a716-446655440000",
+    "denomination": "Catholic",
+    "evergreen": true,
+    "drm": ["aspen", "kallm"],
+    "author": ["Jane Doe", "John Smith"],
+    "isbn": "978-3-16-148410-0",
+    
+    "item_title": "Main Document Title",
+    "item_subtitle": "An Informative Subtitle",
+    "item_image": "https://example.com/images/document-cover.jpg",
+    "item_url": "https://example.com/original-content",
+    "item_file": "https://example.com/downloads/document.pdf",
+    "item_summary": "A brief summary of the document's content and purpose.",
+    "item_number": "DOC-2023-001",
+    "item_extra": "Additional information about this item",
+    "item_tags": ["documentation", "api", "tutorial", "reference"],
+    
+    "h2_title": "Section Heading",
+    "h2_subtitle": "Section Subheading",
+    "h2_image": "https://example.com/images/section-image.jpg",
+    "h2_url": "https://example.com/section",
+    "h2_file": "https://example.com/downloads/section.pdf",
+    "h2_summary": "Summary of this specific section",
+    "h2_number": "2.1",
+    "h2_extra": "Additional section metadata",
+    
+    "h3_title": "Subsection Heading",
+    "h3_subtitle": "Subsection Subheading",
+    "h3_image": "https://example.com/images/subsection-image.jpg",
+    "h3_url": "https://example.com/subsection",
+    "h3_file": "https://example.com/downloads/subsection.pdf",
+    "h3_summary": "Summary of this specific subsection",
+    "h3_number": "2.1.3",
+    "h3_extra": "Additional subsection metadata",
+    
+    "type": "Article",
+    "duration": "15 minutes",
+    "pages": "12",
+    "publication_date": "2023-07-15",
+    "hosted_url": "https://cdn.example.com/hosted-content",
+    "pub_type": "technical"
+  }
+  ```
+</CodeGroup>
+
+## Required and Optional Fields
+
+### Core Required Fields
+
+| Field         | Type        | Description                                                                                             |
+| ------------- | ----------- | ------------------------------------------------------------------------------------------------------- |
+| publisher\_id | UUID string | UUID of the publisher associated with the content \***This must be associated with your organization.** |
+| content       | String      | The actual text content to be ingested and chunked                                                      |
+
+### All Available Metadata
+
+### Metadata Fields
+
+The below are helpful metadata fields that will be beneficial for further retrieval
+
+| Field          | Type            | Required | Description                                                               |
+| -------------- | --------------- | -------- | ------------------------------------------------------------------------- |
+| content        | String          | Yes      | The actual text content to be ingested and chunked                        |
+| filename       | String          | No       | Custom filename for this content                                          |
+| type           | String          | No       | Content type (e.g., article, blog, tutorial)                              |
+| item\_title    | String          | No\*     | Title of the content item                                                 |
+| item\_subtitle | String          | No       | Subtitle of the content item                                              |
+| item\_summary  | String          | No       | Brief summary of the content                                              |
+| item\_image    | String          | No       | URL to image associated with the content                                  |
+| item\_url      | String          | No       | URL to the original content                                               |
+| item\_file     | String          | No       | URL to a file associated with the content                                 |
+| item\_number   | String          | No       | Identifying number for the content item                                   |
+| item\_extra    | String          | No       | Additional information about the content item                             |
+| item\_tags     | Array or String | No       | Tags associated with the content (can be array or comma-separated string) |
+
+### Author and Publishing Information
+
+| Field             | Type            | Required | Description                                                          |
+| ----------------- | --------------- | -------- | -------------------------------------------------------------------- |
+| author            | Array or String | No       | Author(s) of the content (can be array or comma-separated string)    |
+| isbn              | String          | No       | ISBN if content is from a book                                       |
+| publication\_date | String          | No       | Date when the content was published (recommended format: YYYY-MM-DD) |
+| producer\_id      | String          | No       | ID of the content producer                                           |
+| denomination      | String          | No       | Religious denomination (if applicable)                               |
+| pub\_type         | String          | No       | Publication type                                                     |
+| hosted\_url       | String          | No       | URL where the content is hosted                                      |
+| pages             | String          | No       | Number of pages (for documents)                                      |
+| duration          | String          | No       | Duration (for audio/video content)                                   |
+
+### Hierarchical Structure (for organized content)
+
+| Field        | Type   | Required | Description                                 |
+| ------------ | ------ | -------- | ------------------------------------------- |
+| h2\_title    | String | No       | Title for level 2 heading/section           |
+| h2\_subtitle | String | No       | Subtitle for level 2 heading/section        |
+| h2\_image    | String | No       | Image URL for level 2 heading/section       |
+| h2\_url      | String | No       | URL for level 2 heading/section             |
+| h2\_file     | String | No       | File URL for level 2 heading/section        |
+| h2\_summary  | String | No       | Summary for level 2 heading/section         |
+| h2\_number   | String | No       | Number for level 2 heading/section          |
+| h2\_extra    | String | No       | Additional info for level 2 heading/section |
+| h3\_title    | String | No       | Title for level 3 heading/section           |
+| h3\_subtitle | String | No       | Subtitle for level 3 heading/section        |
+| h3\_image    | String | No       | Image URL for level 3 heading/section       |
+| h3\_url      | String | No       | URL for level 3 heading/section             |
+| h3\_file     | String | No       | File URL for level 3 heading/section        |
+| h3\_summary  | String | No       | Summary for level 2 heading/section         |
+
+***
+
+[Generate API Credentials](/docs/generating-api-credentials)
+
+[Completions](/docs/completions-api)
+
+* [Table of Contents](#)
+
+* * [Real-Time Content Ingestion API Guide](#real-time-content-ingestion-api-guide)
+
+  * * [API Endpoint](#api-endpoint)
+    * [Authentication](#authentication)
+    * [Request Body](#request-body)
+    * [Required and Optional Fields](#required-and-optional-fields)

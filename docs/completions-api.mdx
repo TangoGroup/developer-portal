@@ -1,0 +1,116 @@
+---
+title: "Completions"
+description: "Conversational Chat Completions"
+---
+
+<Check />
+
+# Why Use Standard Chat Completions?
+
+Standard chat completions—like OpenAI’s `chat/completions` endpoint—are quickly becoming the *industry default* for building conversational AI. Whether you're developing a chatbot, virtual assistant, or AI-powered automation, here's why sticking with the standard just makes sense.
+
+<Info />
+
+# Familiar Developer Experience
+
+If you've used tools like OpenAI, Anthropic, or other LLM providers, you've likely already encountered the `chat` format: a sequence of messages between `system`, `user`, and `assistant`.
+
+<CodeGroup>
+  ```bash bash
+  [
+    { "role": "system", "content": "You are a helpful assistant." },
+    { "role": "user", "content": "How do I reset my password?" }
+  ]
+  ```
+</CodeGroup>
+
+This simple message-based interface has become the **standard across APIs**—making it easier to build, test, and scale without needing to relearn a custom format for every provider.
+
+# Plug-and-Play with Tools and SDKs
+
+Standard chat completions are supported out-of-the-box by:
+
+* Popular SDKs (`openai`, `langchain`, `llamaindex`, etc.)
+* Prompt engineering tools
+* Debugging/observability dashboards
+* Prompt versioning platforms
+* Orchestration frameworks
+
+That means **less boilerplate** and **more productivity**.
+
+# Easily Portable Across Models
+
+Using a standard chat format lets you switch between:
+
+* OpenAI's GPT models
+* Anthropic's Claude
+* Google Gemini
+* Open-source chat models like Mistral, LLaMA, or Mixtral
+
+...without rewriting your app logic.
+
+Standardization lets you **benchmark models**, compare outputs, and even build model-agnostic fallbacks or ensembles.
+
+# Better Alignment with Human Intent
+
+The chat format encourages natural interaction flow, including:
+
+* Clarification (multi-turn)
+* Function/tool calling
+* Role-based prompting (e.g. system as context setter)
+
+It also makes features like **memory**, **tool use**, and **retrieval-augmented generation (RAG)** feel native, rather than bolted on.
+
+# Built-In Support for Advanced Features
+
+Using chat completions gives you access to:
+
+* Function/tool calling
+* JSON mode
+* Temperature/top\_p control
+* Streaming support
+* Multi-turn context windows
+
+These features are essential for **reliable**, **context-aware**, and **real-time** applications.
+
+# Supported by the Ecosystem
+
+From hosting providers to vector databases, the whole AI tooling ecosystem now expects the standard chat format. It’s the easiest way to stay compatible and future-proof your codebase.
+
+# TL;DR: Why Use Standard Chat Completions?
+
+| Benefit               | Description                                                                                                |
+| --------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Familiar              | Common API shape across many providers                                                                     |
+| Pluggable             | Compatible with SDKs and tools                                                                             |
+| Portable              | Easy to swap or compare models                                                                             |
+| Powerful              | Supports advanced features like tool calling                                                               |
+| Ecosystem-Ready       | Plays nicely with the AI stack                                                                             |
+| **Human Flourishing** | Build with AI and Human Flourishing capabilities at it's core with the world's leading open source models. |
+
+***
+
+**Ready to build?**
+
+The chat format is your foundation for production-ready AI apps—backed by best practices, trusted by industry, and ready to scale.
+
+Quickstart [Completions API](https://docs.ai.gloo.com/docs/quickstart-for-developers#/call-our-completions-api)
+
+***
+
+What’s Next
+
+Learn more about our Chat (Threads) API.
+
+* [Chat API (Threads)](/docs/chat-api-threads)
+
+* [Table of Contents](#)
+
+* * [Why Use Standard Chat Completions?](#why-use-standard-chat-completions)
+  * [Familiar Developer Experience](#familiar-developer-experience)
+  * [Plug-and-Play with Tools and SDKs](#plug-and-play-with-tools-and-sdks)
+  * [Easily Portable Across Models](#easily-portable-across-models)
+  * [Better Alignment with Human Intent](#better-alignment-with-human-intent)
+  * [Built-In Support for Advanced Features](#built-in-support-for-advanced-features)
+  * [Supported by the Ecosystem](#supported-by-the-ecosystem)
+  * [TL;DR: Why Use Standard Chat Completions?](#tldr-why-use-standard-chat-completions)
