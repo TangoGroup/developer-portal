@@ -107,18 +107,40 @@
       },
       {
         "tab": "API Reference",
-        "groups": [
+        "anchors": [
           {
-            "group": "Gloo AI",
+            "anchor": "Gloo AI",
+            "icon": "microchip-ai",
+            "groups": [
+              {
+                "group": "Gloo AI",
+                "openapi": {
+                  "source": "/api-reference/ai/aiapiopenapi.json",
+                  "directory": "api-reference"
+                }
+              },
+              {
+                "group": "Data Engine",
+                "openapi": {
+                  "source": "/api-reference/data-engine/deopenapi.json",
+                  "directory": "api-reference"
+                }
+              }
+            ]
+          },
+          {
+            "anchor": "Impact",
+            "icon": "chart-line",
             "openapi": {
-              "source": "/api-reference/ai/aiapiopenapi.json",
+              "source": "/api-reference/impact/impact-public-api-openapi.yaml",
               "directory": "api-reference"
             }
           },
           {
-            "group": "Data Engine",
+            "anchor": "Platform",
+            "icon": "layer-group",
             "openapi": {
-              "source": "/api-reference/data-engine/deopenapi.json",
+              "source": "/api-reference/accounts/accounts.yaml",
               "directory": "api-reference"
             }
           }
