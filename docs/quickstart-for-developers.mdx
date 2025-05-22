@@ -1,0 +1,586 @@
+---
+title: "Quickstart for Developers"
+description: "Build with AI centered on human flourishing."
+---
+
+<Info />
+
+# 🔑 Generate API Credentials
+
+[Create a user profile](https://docs.ai.gloo.com/docs/signing-up#/) for Gloo AI Studio. Once you have signed up and signed in, you can [generate API credentials](https://docs.ai.gloo.com/docs/generating-api-credentials#/).
+
+![](https://files.readme.io/65e0b438c039144df02735f66b3239c5e099b6c5eb854fe8e4c191738e29be5f-APICredentials2.gif)
+
+# 🎟️ Use Your API Credentials to Generate an Access Token
+
+Now that you have generated your client credentials, you can generate an access token that can be used to consume our various APIs like the Completions API !
+
+## Programmatically Generate
+
+<CodeGroup>
+  ```bash bash
+  import base64
+  import requests
+
+  def get_access_token(client_id: str, client_secret: str) -> dict:
+      auth = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
+      
+      response = requests.post(
+          "https://platform.ai.gloo.com/oauth2/token",
+          headers={
+              "Content-Type": "application/x-www-form-urlencoded",
+              "Authorization": f"Basic {auth}"
+          },
+          data={
+              "grant_type": "client_credentials",
+              "scope": "api/access"
+          }
+      )
+      
+      return response.json()
+
+  # Check token expiration
+  from jwt import decode
+  token_data = get_access_token(client_id, client_secret)
+  decoded = decode(token_data["access_token"], verify=False)
+  expiration = decoded["exp"]
+  ```
+
+  ```bash bash
+  curl -X POST \
+    https://platform.ai.gloo.com/oauth2/token \
+    -H 'Content-Type: application/x-www-form-urlencoded' \
+    -H 'Authorization: Basic <Base64("client_id:client_secret")>' \
+    -d 'grant_type=client_credentials&scope=api/access'
+  ```
+
+  ```bash bash
+  import { Buffer } from 'buffer';
+
+  async function getAccessToken(clientId: string, clientSecret: string): Promise<string> {
+    const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    
+    const response = await fetch(
+      'https://platform.ai.gloo.com/oauth2/token',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${auth}`
+        },
+        body: new URLSearchParams({
+          'grant_type': 'client_credentials',
+          'scope': 'api/access'
+        })
+      }
+    );
+
+    const data = await response.json();
+    
+    // Check token expiration
+    const decoded = JSON.parse(
+      Buffer.from(data.access_token.split('.')[1], 'base64').toString()
+    );
+    const expiration = decoded.exp;
+    
+    return data.access_token;
+  }
+  ```
+
+  ```bash bash
+  require 'base64'
+  require 'net/http'
+  require 'json'
+  require 'jwt'
+
+  def access_token(client_id, client_secret)
+    auth = Base64.strict_encode64("#{client_id}:#{client_secret}")
+    
+    uri = URI('https://platform.ai.gloo.com/oauth2/token')
+    request = Net::HTTP::Post.new(uri)
+    request['Content-Type'] = 'application/x-www-form-urlencoded'
+    request['Authorization'] = "Basic #{auth}"
+    request.set_form_data(
+      'grant_type' => 'client_credentials',
+      'scope' => 'api/access'
+    )
+
+    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+      http.request(request)
+    end
+
+    data = JSON.parse(response.body)
+    
+    # Check token expiration
+    decoded = JWT.decode(data['access_token'], nil, false).first
+    expiration = decoded['exp']
+    
+    data['access_token']
+  end
+  ```
+
+  ```bash bash
+  package main
+
+  import (
+      "encoding/base64"
+      "encoding/json"
+      "fmt"
+      "net/http"
+      "net/url"
+      "strings"
+      "time"
+  )
+
+  func getAccessToken(clientID, clientSecret string) (string, error) {
+      auth := base64.StdEncoding.EncodeToString([]byte(clientID + ":" + clientSecret))
+      
+      data := url.Values{}
+      data.Set("grant_type", "client_credentials")
+      data.Set("scope", "api/access")
+      
+      req, err := http.NewRequest("POST", 
+          "https://platform.ai.gloo.com/oauth2/token",
+          strings.NewReader(data.Encode()))
+      if err != nil {
+          return "", err
+      }
+      
+      req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+      req.Header.Set("Authorization", "Basic " + auth)
+      
+      resp, err := http.DefaultClient.Do(req)
+      if err != nil {
+          return "", err
+      }
+      defer resp.Body.Close()
+      
+      var result struct {
+          AccessToken string `json:"access_token"`
+      }
+      if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+          return "", err
+      }
+      
+      // Check token expiration from JWT payload
+      parts := strings.Split(result.AccessToken, ".")
+      if len(parts) != 3 {
+          return "", fmt.Errorf("invalid token format")
+      }
+      
+      var payload struct {
+          Exp int64 `json:"exp"`
+      }
+      
+      payloadBytes, _ := base64.RawURLEncoding.DecodeString(parts[1])
+      json.Unmarshal(payloadBytes, &payload)
+      
+      expiration := time.Unix(payload.Exp, 0)
+      
+      return result.AccessToken, nil
+  }
+  ```
+</CodeGroup>
+
+# ✨ Call our Completions API
+
+Select from one of the Gloo AI models and set custom settings.
+
+If you are a developer using the OpenAI chat completions API standard, then switching to Gloo AI for chat completions is simple. By switching to Gloo AI, your LLM will respond with human-flourishing content.
+
+Learn more about [Completions API](https://docs.ai.gloo.com/docs/completions-api#/)
+
+#### Supported Providers
+
+These are some of the many providers that support the OpenAI chat completions API standard. If you use any of these, then using Gloo should be effortless!
+
+* OpenAI
+* Gemini
+* Azure
+* Anthropic
+* Cohere
+* Together.ai
+* CloudFlare Workers AI
+
+Here are three ways that you can switch to using Gloo AI as your chat completions provider.
+
+## Using cURL
+
+### Completions Endpoint
+
+Replace the CLIENT\_ACCESS\_TOKEN with your Client Access Token from the generated token on your API Credentials page.
+
+<CodeGroup>
+  ```bash bash
+  import requests
+
+  url = "https://platform.ai.gloo.com/ai/v1/chat/completions"
+  headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer CLIENT_ACCESS_TOKEN"  # Replace with your actual token
+  }
+  payload = {
+      "model": "meta.llama3-70b-instruct-v1:0",
+      "messages": [
+          {
+              "role": "system",
+              "content": "You are a human-flourishing assistant."
+          },
+          {
+              "role": "user",
+              "content": "How do I discover my purpose?"
+          }
+      ]
+  }
+
+  response = requests.post(url, headers=headers, json=payload)
+
+  if response.status_code == 200:
+      print(response.json())
+  else:
+      print(f"Error {response.status_code}: {response.text}")
+  ```
+
+  ```bash bash
+  curl https://platform.ai.gloo.com/ai/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer CLIENT_ACCESS_TOKEN" \
+    -d '{
+      "model": "meta.llama3-70b-instruct-v1:0",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a human-flourishing assistant."
+        },
+        {
+          "role": "user",
+          "content": "How do I discover my purpose?"
+        }
+      ]
+    }'
+  ```
+</CodeGroup>
+
+### List of Models Endpoint
+
+The Gloo AI Completions API supports many of the world's best open-source models with Human Flourishing and Safety at its core.
+
+<CodeGroup>
+  ```bash bash
+  curl https://platform.ai.gloo.com/ai/v1/models \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer CLIENT_ACCESS_TOKEN"
+  ```
+
+  ```bash bash
+  import requests
+
+  url = "https://platform.ai.gloo.com/ai/v1/models"
+  headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer CLIENT_ACCESS_TOKEN"  # Replace with your actual token
+  }
+
+  response = requests.get(url, headers=headers)
+
+  if response.status_code == 200:
+      print(response.json())
+  else:
+      print(f"Error {response.status_code}: {response.text}")
+  ```
+</CodeGroup>
+
+<Info />
+
+## Using the OpenAI SDK
+
+<CodeGroup>
+  ```bash bash
+  # Setup
+
+  from openai import OpenAI
+
+  client = OpenAI(
+      api_key='CLIENT_ACCESS_TOKEN',  # Your Client Access Token
+      base_url='https://platform.ai.gloo.com/ai/v1'  # Gloo base URL
+  )
+
+  # Completions
+
+  response = client.chat.completions.create(
+      model='meta-llama/Llama-3.3-70B-Instruct',
+      messages=[
+          {'role': "system", 'content': 'You are a human-flourishing assistant.'},
+          {'role': 'user', 'content': 'How can I be joyful in hard times?'}
+      ],
+  )
+
+  print(response.choices[0].message.content)
+
+  # List models
+
+  models = client.models.list()
+
+  print(models)
+  ```
+
+  ```bash bash
+  // Setup
+
+  import OpenAI from 'openai';
+
+  const openai = new OpenAI({
+      apiKey: 'GLOO_API_KEY',  // Your Gloo API key
+      baseURL: 'https://platform.ai.gloo.com/ai/v1',  // Gloo base URL
+  });
+
+  // Completions
+
+  const response = await openai.chat.completions.create({
+      messages: [
+          { role: 'system', content: 'You are a human-flourishing assistant.' },
+          { role: 'user', content: 'How can I be joyful in hard times?' } 
+      ],
+      model: 'meta-llama/Llama-3.3-70B-Instruct',
+  });
+
+  console.log(response.choices[0].message.content);
+
+  // List models
+
+  const models = await openai.models.list();
+
+  console.log(models)
+  ```
+</CodeGroup>
+
+## Using the Vercel AI SDK
+
+<CodeGroup>
+  ```bash bash
+  // Setup
+
+  import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+
+  const provider = createOpenAICompatible({
+    name: 'gloo-ai',
+    apiKey: 'CLIENT_ACCESS_TOKEN',  // Your Client Access Token
+    baseURL: 'https://platform.ai.gloo.com/ai/v1',  // Gloo base URL
+  });
+
+  // Completions
+
+  const { text } = await generateText({
+    model: provider('meta-llama/Llama-3.3-70B-Instruct'),
+    prompt: 'How can I find a mentor?',
+  });
+
+  console.log(text);
+
+  // List models is not supported by Vercel AI SDK
+  ```
+</CodeGroup>
+
+# 🧰 Tooling with Gloo's Chat Completions
+
+If you're using Gloo’s Chat Completions API, you can enhance your LLM interactions by defining tools. Tools allow the language model to optionally or explicitly invoke external functions, enabling it to perform specific tasks, retrieve data, or execute actions as part of the conversation flow.
+
+## Supported Models
+
+Gloo provides several models with tooling support:
+
+| Model                                     | Tool Use | Streaming Tool Use |
+| ----------------------------------------- | -------- | ------------------ |
+| meta-llama/Llama-3.3-70B-Instruct         | Yes      | Yes                |
+| GlooAI/KALLM-Llama-3.1-8B-Hybrid-v0.2     | Yes      | Yes                |
+| amazon.nova-micro-v1:0                    | Yes      | Yes \*             |
+| anthropic.claude-3-5-sonnet-20240620-v1:0 | Yes      | Yes \*             |
+| mistral.mistral-large-2402-v1:0           | Yes      | No                 |
+| mistral.mistral-small-2402-v1:0           | Yes      | No                 |
+
+(\*) The models supporting “Streaming Tool Use” with an asterisk besides them do not support the official OpenAI API standard, and may not be compatible with the OpenAI SDK.
+
+## Using cURL
+
+<CodeGroup>
+  ```bash bash
+  curl https://platform.ai.gloo.com/ai/v1/chat/completions \
+    -H 'Content-Type: application/json' \
+    -H "Authorization: Bearer GLOO_API_KEY" \
+    -d '{
+    "model": "amazon.nova-micro-v1:0",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the weather like in Shanghai today?"
+      }
+    ],
+    "stream": false,
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_current_weather",
+          "description": "Get the current weather in a given location",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "location": { "type": "string" },
+              "unit": { "type": "string", "enum": ["celsius", "fahrenheit"] }
+            },
+            "required": ["location"]
+          }
+        }
+      }
+    ],
+    "tool_choice": "required"
+  }'
+  ```
+</CodeGroup>
+
+## Using the OpenAPI SDK
+
+<CodeGroup>
+  ```bash bash
+  # Setup
+
+  from openai import OpenAI
+
+  client = OpenAI(
+      api_key='GLOO_API_KEY',  # Your Gloo API key 
+      base_url='https://platform.ai.gloo.com/ai/v1'  # Gloo base URL
+  )
+
+  # Chat Completions call with tooling
+
+  response = client.ChatCompletion.create(
+      model="amazon.nova-micro-v1:0",
+      messages=[
+          {
+              "role": "user",
+              "content": "What is the weather like in Shanghai today?"
+          }
+      ],
+      stream=False,
+      tools=[
+          {
+              "type": "function",
+              "function": {
+                  "name": "get_current_weather",
+                  "description": "Get the current weather in a given location",
+                  "parameters": {
+                      "type": "object",
+                      "properties": {
+                          "location": {"type": "string"},
+                          "unit": {
+                              "type": "string",
+                              "enum": ["celsius", "fahrenheit"]
+                          }
+                      },
+                      "required": ["location"]
+                  }
+              }
+          }
+      ],
+      tool_choice="required"
+  )
+
+  print(response)
+  ```
+
+  ```bash bash
+  // Setup
+
+  import { OpenAI } from 'openai';
+
+  const client = new OpenAI({
+    apiKey: 'GLOO_API_KEY',  // Your Gloo API key 
+    baseUrl: 'https://platform.ai.gloo.com/ai/v1',  // Gloo base URL
+  });
+
+  // Chat completions with tooling
+
+  const response = await client.chat.completions.create({
+    model: 'amazon.nova-micro-v1:0',
+    messages: [
+      {
+        role: 'user',
+        content: 'What is the weather like in Shanghai today?',
+      },
+    ],
+    stream: false,
+    tools: [
+      {
+        type: 'function',
+        function: {
+          name: 'get_current_weather',
+          description: 'Get the current weather in a given location',
+          parameters: {
+            type: 'object',
+            properties: {
+              location: { type: 'string' },
+              unit: {
+                type: 'string',
+                enum: ['celsius', 'fahrenheit'],
+              },
+            },
+            required: ['location'],
+          },
+        },
+      },
+    ],
+    tool_choice: 'required',
+  });
+
+  console.log(response);
+  ```
+</CodeGroup>
+
+# 💬 Chat with our LLM with the Chat Endpoint
+
+Use the `/ai/v1/message` endpoint to start a chat with our LLM and get relevant values-aligned sources that help answer your query.
+
+Replace the CLIENT\_ACCESS\_TOKEN with your Client Access Token from the generated token on your API Credentials page.
+
+<CodeGroup>
+  ```bash bash
+  curl --location 'https://platform.ai.gloo.com/ai/v1/message' \
+  --header 'accept: application/json' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer CLIENT_ACCESS_TOKEN' \
+  --data '{
+    "query": "How can I be a better friend?",
+    "stream": false
+  }'
+  ```
+</CodeGroup>
+
+Learn more about [Chat API](https://docs.ai.gloo.com/reference/post-message#/)
+
+***
+
+[Quickstart for Publishers](/docs/quickstart-for-publishers)
+
+[Gloo AI Account](/docs/gloo-ai-account)
+
+* [Table of Contents](#)
+
+* * [🔑 Generate API Credentials](#-generate-api-credentials)
+
+  * [🎟️ Use Your API Credentials to Generate an Access Token](#%EF%B8%8F-use-your-api-credentials-to-generate-an-access-token)
+
+  * * [Programmatically Generate](#programmatically-generate)
+
+  * [✨ Call our Completions API](#-call-our-completions-api)
+
+  * * [Using cURL](#using-curl)
+    * [Using the OpenAI SDK](#using-the-openai-sdk)
+    * [Using the Vercel AI SDK](#using-the-vercel-ai-sdk)
+
+  * [🧰 Tooling with Gloo's Chat Completions](#-tooling-with-gloos-chat-completions)
+
+  * * [Supported Models](#supported-models)
+    * [Using cURL](#using-curl-1)
+    * [Using the OpenAPI SDK](#using-the-openapi-sdk)
+
+  * [💬 Chat with our LLM with the Chat Endpoint](#-chat-with-our-llm-with-the-chat-endpoint)

@@ -1,36 +1,106 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "theme": "maple",
+  "name": "Gloo",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#F6C414",
+    "light": "#F6C414",
+    "dark": "#F6C414"
   },
-  "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/logo/logo-gloo-studio_dark.png",
+    "dark": "/logo/logo-gloo-studio_light.png"
+  },
+  "favicon": "/images/favicon.png",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
             "group": "Get Started",
+            "icon": "rocket-launch",
             "pages": [
-              "introduction",
-              "quickstart",
-              "development"
+              "docs/overview",
+              "docs/quickstart-for-publishers",
+              "docs/quickstart-for-developers"
             ]
           },
           {
-            "group": "Essentials",
+            "group": "Documentation",
+            "icon": "books",
             "pages": [
-              "essentials/web-standards",
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+              {
+                "group": "Gloo AI Account",
+                "pages": [
+                  "docs/gloo-ai-account",
+                  "docs/signing-up"
+                ]
+              },
+              {
+                "group": "Studio",
+                "pages": [
+                  "docs/gloo-ai-studio",
+                  {
+                    "group": "Organizations & Publishers",
+                    "pages": [
+                      "docs/organizations",
+                      "docs/what-is-an-organization-1",
+                      "docs/creating-your-organization-1",
+                      "docs/managing-your-organization-1",
+                      "docs/creatingmanaging-publishers",
+                      "docs/invitingmanaging-users"
+                    ]
+                  },
+                  {
+                    "group": "Data Engine",
+                    "pages": [
+                      "docs/data-engine",
+                      "docs/upload-your-data",
+                      "docs/enrich-your-data"
+                    ]
+                  },
+                  {
+                    "group": "APIs",
+                    "pages": [
+                      "docs/generating-api-credentials",
+                      "docs/real-time-api",
+                      "docs/completions-api",
+                      "docs/tools-for-completions",
+                      "docs/chat-api-threads",
+                      "docs/search",
+                      "docs/paywall"
+                    ]
+                  },
+                  {
+                    "group": "AI Components",
+                    "pages": [
+                      "docs/ai-components",
+                      "docs/ai-discovery"
+                    ]
+                  },
+                  "docs/ai-assistants"
+                ]
+              },
+              "docs/chat-1"
+            ]
+          },
+          {
+            "group": "Learn More ",
+            "icon": "circle-info",
+            "pages": [
+              {
+                "group": "What is Gloo AI?",
+                "pages": [
+                  "docs/getting-started",
+                  "docs/open",
+                  "docs/trust",
+                  "docs/licensing"
+                ]
+              },
+              "docs/why-gloo-ai",
+              "docs/benchmarking",
+              "docs/our-llm"
             ]
           }
         ]
@@ -39,89 +109,21 @@
         "tab": "API Reference",
         "groups": [
           {
-            "group": "API Documentation",
-            "pages": [
-              "api-reference/introduction"
-            ]
-          },
-          {
-            "group": "Endpoint Examples",
-            "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
-            ]
-          },
-          {
-            "group": "Accounts",
+            "group": "Gloo AI",
             "openapi": {
-              "source": "api-reference/accounts/accounts.yaml"
-            }
-          },
-          {
-            "group": "Impact",
-            "openapi": {
-              "source": "api-reference/impact/impact-public-api-openapi.yaml"
-            }
-          },
-          {
-            "group": "AI",
-            "openapi": {
-              "source": "api-reference/ai/aiapiopenapi.json"
+              "source": "/api-reference/ai/aiapiopenapi.json",
+              "directory": "api-reference"
             }
           },
           {
             "group": "Data Engine",
             "openapi": {
-              "source": "api-reference/data-engine/deopenapi.json"
+              "source": "/api-reference/data-engine/deopenapi.json",
+              "directory": "api-reference"
             }
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+    ]
   }
 }

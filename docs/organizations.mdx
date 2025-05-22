@@ -1,0 +1,53 @@
+---
+title: "Organizations & Publishers"
+description: "The foundation of what makes Gloo AI Studio secure and scalable."
+---
+
+# 🔐 Understanding Orgs & Publishers in Gloo Studio
+
+Gloo Studio is built to enable secure, scalable, and collaborative AI workflows across organizations and publishers. At the core of this architecture is our multi-tenant [data engine](https://docs.ai.gloo.com/docs/data-engine#/), which ensures data isolation and control while empowering teams to create, manage, and deploy AI assets confidently.
+
+To support this, Studio uses a robust permission and ownership model built around two primary entities: Organizations and Publishers.
+
+## 🏢 Organizations: The Source of Truth for Ownership
+
+An Org (short for “Organization”) represents the root entity in Gloo Studio’s multi-tenant architecture. All data, models, projects, and assets are scoped to a specific Org, ensuring:
+
+• Data Isolation: Data stored under an Org is completely isolated from all other Orgs in both storage and compute. • Access Control: Only users explicitly added to the Org can access or act on its resources, based on their roles. • Audibility: All actions taken on Org-owned assets are logged and attributable to specific users, supporting regulatory and internal audit requirements.
+
+Org-level capabilities include:
+
+• API key management • Embedding and retrieval pipelines • Publisher management
+
+## 🧾 Publishers: Creating and Curating on Behalf of an Org
+
+A Publisher is a specific persona or sub-entity within an Org that produces and maintains AI assets (e.g., models, datasets, assistants, templates, content). Publishers allow Gloo Studio to support a separation of identity from ownership, while preserving control.
+
+Think of a Publisher as: • A brand, team, or public-facing identity within an Org • The owner of record for any assets published to shared environments. • A scoped permission boundary for who can act as that Publisher
+
+Key features: • Assets are created by a Publisher • Publishers can only act within their parent Org • Access to create/edit as a Publisher is role-gated and auditable
+
+# 🛡️ Security by Design
+
+Behind the scenes, Gloo enforces a strict multi-tenant security model: • Logical and physical isolation at the storage layer (S3, DB, vector store) • Org ID propagation in every API and job submission request • Publisher-scoped permissions enforce principle of least privilege • Zero-leakage guarantee: No customer or IP data is ever exposed to another Org • Gloo Studio Audit Layer: Full traceability of actions, changes, and data movement across Orgs and Publishers
+
+# 📌 Why This Matters
+
+By making Orgs the secure boundary and Publishers the creative surface, Gloo Studio enables: • Enterprise-grade data governance • Safe team collaboration at scale • Clear attribution and control of public assets • Extensibility across internal teams, external partners, and public consumption
+
+***
+
+[Studio](/docs/gloo-ai-studio)
+
+[What is An Organization?](/docs/what-is-an-organization-1)
+
+* [Table of Contents](#)
+
+* * [🔐 Understanding Orgs & Publishers in Gloo Studio](#-understanding-orgs--publishers-in-gloo-studio)
+
+  * * [🏢 Organizations: The Source of Truth for Ownership](#-organizations-the-source-of-truth-for-ownership)
+    * [🧾 Publishers: Creating and Curating on Behalf of an Org](#-publishers-creating-and-curating-on-behalf-of-an-org)
+
+  * [🛡️ Security by Design](#%EF%B8%8F-security-by-design)
+
+  * [📌 Why This Matters](#-why-this-matters)

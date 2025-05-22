@@ -1,0 +1,6 @@
+---
+title: "Start → Chat with Gloo AI Models"
+description: "post https://platform.ai.gloo.com/ai/{v}/message"
+---
+
+Chat with Gloo AI Models → `chat_id` is optional- A new chat will be created automatically.→ Link chat to User (optional)1. Provide Header `Authorization: <token>`→ Resume existing chat1. Provide Header `Authorization: <token>`2. Provide `chat_id`KALLM by default will perform a sentiment analysis on your prompt. It also will by default, provide suggestion follow ups, and will depending on your prompt return sources that have influenced the response from our trusted partners.You can choose to override the defaults with the query params: `intent`, `enable_sources`, `enable_suggestions`.Example 1: You want a rich answer that is based on trusted sources and provides you follow up suggestions. This is the default behavior: omit all query params.Example 2: You know that your prompt is going to require trusted sources as a part of the answer. You also want to not have follow up suggestions. intent: 1, enable\_suggestions: 0Example 3: You know that your prompt is not going to require trusted sources. You also want to not have follow up suggestions. intent: 0, enable\_suggestions: 0
