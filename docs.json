@@ -21,9 +21,9 @@
             "group": "Get Started",
             "icon": "rocket-launch",
             "pages": [
-              "docs/overview",
-              "docs/quickstart-for-publishers",
-              "docs/quickstart-for-developers"
+              "docs/ai/overview",
+              "docs/ai/quickstart-for-publishers",
+              "docs/ai/quickstart-for-developers"
             ]
           },
           {
@@ -33,56 +33,56 @@
               {
                 "group": "Gloo AI Account",
                 "pages": [
-                  "docs/gloo-ai-account",
-                  "docs/signing-up"
+                  "docs/ai/gloo-ai-account",
+                  "docs/ai/signing-up"
                 ]
               },
               {
                 "group": "Studio",
                 "pages": [
-                  "docs/gloo-ai-studio",
+                  "docs/ai/gloo-ai-studio",
                   {
                     "group": "Organizations & Publishers",
                     "pages": [
-                      "docs/organizations",
-                      "docs/what-is-an-organization-1",
-                      "docs/creating-your-organization-1",
-                      "docs/managing-your-organization-1",
-                      "docs/creatingmanaging-publishers",
-                      "docs/invitingmanaging-users"
+                      "docs/ai/organizations",
+                      "docs/ai/what-is-an-organization-1",
+                      "docs/ai/creating-your-organization-1",
+                      "docs/ai/managing-your-organization-1",
+                      "docs/ai/creatingmanaging-publishers",
+                      "docs/ai/invitingmanaging-users"
                     ]
                   },
                   {
                     "group": "Data Engine",
                     "pages": [
-                      "docs/data-engine",
-                      "docs/upload-your-data",
-                      "docs/enrich-your-data"
+                      "docs/ai/data-engine",
+                      "docs/ai/upload-your-data",
+                      "docs/ai/enrich-your-data"
                     ]
                   },
                   {
                     "group": "APIs",
                     "pages": [
-                      "docs/generating-api-credentials",
-                      "docs/real-time-api",
-                      "docs/completions-api",
-                      "docs/tools-for-completions",
-                      "docs/chat-api-threads",
-                      "docs/search",
-                      "docs/paywall"
+                      "docs/ai/generating-api-credentials",
+                      "docs/ai/real-time-api",
+                      "docs/ai/completions-api",
+                      "docs/ai/tools-for-completions",
+                      "docs/ai/chat-api-threads",
+                      "docs/ai/search",
+                      "docs/ai/paywall"
                     ]
                   },
                   {
                     "group": "AI Components",
                     "pages": [
-                      "docs/ai-components",
-                      "docs/ai-discovery"
+                      "docs/ai/ai-components",
+                      "docs/ai/ai-discovery"
                     ]
                   },
-                  "docs/ai-assistants"
+                  "docs/ai/ai-assistants"
                 ]
               },
-              "docs/chat-1"
+              "docs/ai/chat-1"
             ]
           },
           {
@@ -92,15 +92,22 @@
               {
                 "group": "What is Gloo AI?",
                 "pages": [
-                  "docs/getting-started",
-                  "docs/open",
-                  "docs/trust",
-                  "docs/licensing"
+                  "docs/ai/getting-started",
+                  "docs/ai/open",
+                  "docs/ai/trust",
+                  "docs/ai/licensing"
                 ]
               },
-              "docs/why-gloo-ai",
-              "docs/benchmarking",
-              "docs/our-llm"
+              "docs/ai/why-gloo-ai",
+              "docs/ai/benchmarking",
+              "docs/ai/our-llm"
+            ]
+          },
+          {
+            "group": "External",
+            "icon": "arrow-up-right-from-square",
+            "pages": [
+              "faithstack"
             ]
           }
         ]
