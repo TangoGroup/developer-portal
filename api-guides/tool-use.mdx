@@ -1,0 +1,278 @@
+---
+title: 'Tools Use'
+description: 'Level up Completions by enabling LLMs to call external functions and tools.'
+---
+
+If you're using Gloo's Chat Completions API, you can enhance your LLM interactions by defining **tools**. Tools allow the language model to optionally or explicitly invoke external functions, enabling it to perform specific tasks, retrieve data, or execute actions as part of the conversation flow.
+
+> Adding Tools to the Completions API allows you to grow your experience with Gloo AI, adding capabilities that are human flourishing.
+
+---
+
+## Extended Capabilities Beyond Text Generation
+
+All models are excellent at language generation, but they can't access real-time data or perform calculations natively. Tools allow the model to:
+
+-   Fetch up-to-date information (e.g., weather, stock prices, calendars).
+-   Execute code or math (e.g., calculate complex equations, generate charts).
+-   Interact with databases, APIs, or internal systems (e.g., CRM updates, file searches, emails).
+
+This turns the AI into a universal interface for diverse tasks.
+
+### Automation of Multi-Step Workflows
+
+By using tools, Gloo AI models can:
+-   Chain together steps in a workflow (e.g., "Analyze this document, then email a summary").
+-   Act like a coordinator between systems (e.g., Slack + GitHub + Notion integration).
+-   Enable interactive applications where the AI can take actions and report back results.
+
+This is vital for real-world applications where AI becomes a true assistant rather than just a chatbot.
+
+### Improved Accuracy and Reliability
+
+Rather than "hallucinating" answers, the model can use tools to ground its outputs in real data. By delegating precision tasks like date parsing, data lookup, or logic execution to deterministic systems, you reduce the chance of errors and make the AI trustworthy in mission-critical scenarios.
+
+---
+
+## Using Tools with the Chat Completions Endpoint
+
+### Gloo AI's Supported Models
+
+Gloo provides several models with tooling support. For a complete and up-to-date list of all available models and their specific capabilities, please see our [**Supported Models Guide**](/api-guides/supported-models).
+
+### Gloo AI's Supported Models
+
+Gloo provides several models with tooling support:
+
+| Model                                    | Tool Use | Streaming Tool Use | Context Window | Max Output Tokens |
+| ---------------------------------------- | -------- | ------------------ | -------------- | ----------------- |
+| `us.meta.llama-3-70b-instruct-v1:0`      | Yes      | No                 | 128K           | 2048              |
+| `amazon.nova-micro-v1:0`                 | Yes      | Yes * | 128K           | 10K               |
+| `anthropic.claude-3-5-sonnet-20240620-v1:0` | Yes      | Yes * | 200K           | 8192              |
+| `us.anthropic.claude-3-5-sonnet-20241022-v2:0` | Yes      | Yes * | 200K           | 8192              |
+| `mistral.mistral-large-2402-v1:0`          | Yes      | No                 | 32K            | 4096              |
+| `mistral.mistral-small-2402-v1:0`          | Yes      | No                 | 32K            | 4096              |
+
+<Info>
+(*) The models supporting "Streaming Tool Use" with an asterisk besides them do not support the official OpenAI API standard.
+</Info>
+
+
+### Using cURL
+
+```bash cURL
+curl https://platform.ai.gloo.com/ai/v1/chat/completions \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer CLIENT_ACCESS_TOKEN" \
+  -d '{
+  "model": "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What is the weather like in Shanghai today?"
+    }
+  ],
+  "stream": false,
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_current_weather",
+        "description": "Get the current weather in a given location",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "location": { "type": "string" },
+            "unit": { "type": "string", "enum": ["celsius", "fahrenheit"] }
+          },
+          "required": ["location"]
+        }
+      }
+    }
+  ],
+  "tool_choice": "required"
+}'
+```
+
+### Using the OpenAI SDK (Python)
+
+<CodeGroup>
+    ```python Python
+    # Setup
+
+    from openai import OpenAI
+
+    client = OpenAI(
+        api_key='CLIENT_ACCESS_TOKEN',  # Your Gloo API access token
+        base_url='https://platform.ai.gloo.com/ai/v1'  # Gloo base URL
+    )
+
+    # Chat Completions call with tooling
+
+    response = client.ChatCompletion.create(
+        model="us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+        messages=[
+            {
+                "role": "user",
+                "content": "What is the weather like in Shanghai today?"
+            }
+        ],
+        stream=False,
+        tools=[
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_current_weather",
+                    "description": "Get the current weather in a given location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {"type": "string"},
+                            "unit": {
+                                "type": "string",
+                                "enum": ["celsius", "fahrenheit"]
+                            }
+                        },
+                        "required": ["location"]
+                    }
+                }
+            }
+        ],
+        tool_choice="required"
+    )
+
+    print(response)
+    ```
+
+   ```typescript TypeScript
+   // Setup
+
+   import { OpenAI } from 'openai';
+
+   const client = new OpenAI({
+     apiKey: 'CLIENT_ACCESS_TOKEN',  // Your Gloo API access token
+     baseUrl: 'https://platform.ai.gloo.com/ai/v1',  // Gloo base URL
+   });
+
+   // Chat completions with tooling
+
+   const response = await client.chat.completions.create({
+     model: 'us.anthropic.claude-3-5-sonnet-20241022-v2:0',
+     messages: [
+       {
+         role: 'user',
+         content: 'What is the weather like in Shanghai today?',
+       },
+     ],
+     stream: false,
+     tools: [
+       {
+         type: 'function',
+         function: {
+           name: 'get_current_weather',
+           description: 'Get the current weather in a given location',
+           parameters: {
+             type: 'object',
+             properties: {
+               location: { type: 'string' },
+               unit: {
+                 type: 'string',
+                 enum: ['celsius', 'fahrenheit'],
+               },
+             },
+             required: ['location'],
+           },
+         },
+       },
+     ],
+     tool_choice: 'required',
+   });
+
+   console.log(response);
+   ```
+</CodeGroup>
+
+### Using Inngest's AgentKit SDK (TypeScript)
+
+```typescript TypeScript
+import {
+  createAgent,
+  createTool,
+  openai,
+} from "@inngest/agent-kit";
+import { z } from "zod";
+
+const weatherTool = createTool({
+  name: "check_weather",
+  description:
+    "Returns a string of the weather conditions in a city. Call this to know the weather of a certain city.",
+  parameters: z.object({
+    location: z.string(),
+    unit: z.enum(["celcius", "fahrenheit"]),
+  }),
+  handler: async ({ location, unit }) => {
+    return `The weather in ${location} is sunny with a temperature of 81 ${unit}.`;
+  },
+});
+
+const agent = createAgent({
+    name: 'Weather Agent',
+    description: 'An agent that describes the weather in various cities.',
+    system: 'You are an expert at telling the weather of various cities.',
+    model: openai({
+      baseUrl: 'https://platform.ai.gloo.com/ai/v1',  // Gloo base URL
+      apiKey: 'CLIENT_ACCESS_TOKEN',  // Your Gloo API access token
+      model: 'us.anthropic.claude-3-5-sonnet-20241022-v2:0',
+    }),
+    tools: [weatherTool],
+  });
+
+const response = await agent.run("What is the weather like in Shanghai today?")
+
+console.log(JSON.stringify(response));
+```
+
+### Example Response
+
+```json JSON
+{
+  "id": "chatcmpl-f11e1872",
+  "choices": [
+    {
+      "finish_reason": "tool_calls",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+        "content": null,
+        "refusal": null,
+        "role": "assistant",
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "tooluse_cabMjx5dQG20v3iUwg0LSQ",
+            "function": {
+              "arguments": "{\"unit\": \"celsius\", \"location\": \"Shanghai\"}",
+              "name": "get_current_weather"
+            },
+            "type": "function"
+          }
+        ]
+      }
+    }
+  ],
+  "created": 1746053578,
+  "model": "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+  "object": "chat.completion",
+  "service_tier": null,
+  "system_fingerprint": "fp",
+  "usage": {
+    "completion_tokens": 38,
+    "prompt_tokens": 1196,
+    "total_tokens": 1234,
+    "completion_tokens_details": null,
+    "prompt_tokens_details": null
+  }
+}
+```

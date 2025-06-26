@@ -1,0 +1,56 @@
+---
+title: 'Configure AI Components'
+description: 'How to create, customize, and embed ready-to-use AI Components.'
+---
+
+Gloo AI Components are ready-to-use widgets that you can integrate into your own applications to leverage the power of the platform. The primary component available in Studio is **AI Discovery**.
+
+The **AI Discovery** component is an embeddable widget that enhances your content with intelligent search capabilities. It allows your users to search by topic or question, sourcing results from your ingested and enriched data.
+
+This guide will walk you through the process of building and deploying the Discovery widget.
+
+---
+
+## The Widget Builder
+
+The entire creation and customization process is handled in the five-step Widget Builder.
+
+![The 5-Step Widget Builder](https://files.readme.io/b4a679b3801cfe52b4394cc1cd5e5ca3f6642a543f38f46dd8a771e8d466f6ac-DiscoveryOverview.gif)
+
+### Step 1: Access the Widget Builder
+
+1.  In the Studio sidebar, click on **Components**.
+2.  Select **Discovery** from the sub-menu.
+3.  Use the dropdown at the top right to manage existing widgets or select **"Create New Config"** to start building a new one.
+
+### Step 2: Customize Your Widget
+
+The builder will guide you through four configuration tabs:
+
+1.  **Theme Setup:** Customize your widget’s button and overall appearance. Adjust its color, shape, position, and style to match your site's branding.
+2.  **Metadata:** Select the Publisher through which you want to search content. If you don't have an existing publisher, a prompt will guide you to create one via Organizations.
+3.  **Layout Setup:** Configure the layout of search results (choose between horizontal cards or vertical cards) and set placeholder text for the search input fields.
+4.  **Configuration:**
+    -   Select and API key from the dropdown.
+    -   Define the allowed domains where the widget can be embedded.
+
+<Info>
+If there are no API keys available, click **"Create an API key"** and you'll be redirected to the API Credentials page. See our guide on [Managing API Credentials](/studio/manage-api-credentials).
+</Info>
+
+Ensure you save your configuration in this step—it will then appear in your configurations list (top right).
+
+### Step 3: Embed Your Widget
+
+When you save a new configuration, the Widget Builder will automatically bring you to the fifth and final step, where it will generate an embed code. Simply copy this code and paste it into the HTML of your website where you want the widget to appear.
+
+![Widget Embed Code](https://files.readme.io/950a5e16efb4eac8cda7f947447e813223f017d9eca38e5b8c60ab583068403b-SavingConfigEmbedding.gif)
+
+---
+
+## Editing and Deleting Widgets
+
+You can manage your existing widgets at any time.
+
+-   **To Edit:** From the Discovery page, select the widget you wish to modify from the top-right dropdown menu. You can then change any of the four steps (Theme, Metadata, Layout, Config) and save the updated configuration by clicking "Update Configuration" on the Config step.
+-   **To Delete:** Select a widget from the dropdown and choose the delete option.

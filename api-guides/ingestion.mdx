@@ -1,0 +1,165 @@
+---
+title: 'Real Time Ingestion'
+description: 'Guide to uploading text for instant processing and vectorization'
+---
+
+The Real-Time Ingestion API allows developers to upload text content directly for immediate processing and vectorization. Unlike batch upload methods, this API processes content in real-time, making it suitable for dynamic content that needs to be immediately available for search or retrieval.
+
+## API Endpoint
+
+To ingest content, make a POST request to the following endpoint:
+
+```
+POST /ingestion/v1/real_time_upload
+```
+
+```
+Base URL: https://platform.ai.gloo.com
+```
+
+---
+
+## Authentication
+
+The API requires a JWT token with specific claims to authorize access. The token must be associated with a Client ID that has access to the specified publisher. The system validates that the organization associated with your Client ID has permission to access the publisher specified in your request.
+
+### Headers
+
+| Header          | Value                                |
+| --------------- | ------------------------------------ |
+| `Authorization` | `Bearer <your_access_token>`         |
+| `Content-Type`  | `application/json`                   |
+
+### JWT Token Requirements
+
+Your JWT must include the following claims:
+-   A `sub` claim containing your API Client ID.
+-   A `scope` claim that includes `api/access`.
+
+<Info>
+You will only be able to send content to a publisher that belongs to your organization. Please double-check the `publisher_id` field in the request body for accuracy.
+</Info>
+
+---
+
+## Request Body
+
+The request body should be a single JSON object containing the content and any relevant metadata.
+
+### Example Request
+
+```json JSON
+{
+  "content": "This is the full text content that needs to be processed and indexed for search. It can be as long as needed to represent the document content.",
+  "filename": "sample_document_name.txt",
+  "producer_id": "producer-123",
+  "publisher_id": "550e8400-e29b-41d4-a716-446655440000",
+  "denomination": "Catholic",
+  "evergreen": true,
+  "drm": ["aspen", "kallm"],
+  "author": ["Jane Doe", "John Smith"],
+  "isbn": "978-3-16-148410-0",
+
+  "item_title": "Main Document Title",
+  "item_subtitle": "An Informative Subtitle",
+  "item_image": "https://example.com/images/document-cover.jpg",
+  "item_url": "https://example.com/original-content",
+  "item_file": "https://example.com/downloads/document.pdf",
+  "item_summary": "A brief summary of the document's content and purpose.",
+  "item_number": "DOC-2023-001",
+  "item_extra": "Additional information about this item",
+  "item_tags": ["documentation", "api", "tutorial", "reference"],
+
+  "h2_title": "Section Heading",
+  "h2_subtitle": "Section Subheading",
+  "h2_image": "https://example.com/images/section-image.jpg",
+  "h2_url": "https://example.com/section",
+  "h2_file": "https://example.com/downloads/section.pdf",
+  "h2_summary": "Summary of this specific section",
+  "h2_number": "2.1",
+  "h2_extra": "Additional section metadata",
+
+  "h3_title": "Subsection Heading",
+  "h3_subtitle": "Subsection Subheading",
+  "h3_image": "https://example.com/images/subsection-image.jpg",
+  "h3_url": "https://example.com/subsection",
+  "h3_file": "https://example.com/downloads/subsection.pdf",
+  "h3_summary": "Summary of this specific subsection",
+  "h3_number": "2.1.3",
+  "h3_extra": "Additional subsection metadata",
+
+  "type": "Article",
+  "duration": "15 minutes",
+  "pages": "12",
+  "publication_date": "2023-07-15",
+  "hosted_url": "https://cdn.example.com/hosted-content",
+  "pub_type": "technical"
+}
+```
+
+---
+
+## Fields and Metadata
+
+### Core Required Fields
+
+These fields are mandatory for every request.
+
+| Field          | Type   | Description                                                                            |
+| -------------- | ------ | -------------------------------------------------------------------------------------- |
+| `publisher_id` | String | UUID of the publisher associated with the content. *This must be associated with your organization.* |
+| `content`      | String | The actual text content to be ingested and chunked.                                    |
+
+### All Available Metadata
+
+The following tables list all the optional metadata fields you can include to enrich your content for better search and retrieval.
+
+#### General Metadata
+
+| Field           | Type            | Required | Description                                            |
+| --------------- | --------------- | -------- | ------------------------------------------------------ |
+| `content`      | String          | Yes       | Text content to be ingested and chunked.                      |
+| `filename`      | String          | No       | Custom filename for this content.                      |
+| `type`          | String          | No       | Content type (e.g., `article`, `blog`, `tutorial`).    |
+| `item_title`    | String          | No* | Title of the content item. (*Required if no `h2_title`)|
+| `item_subtitle` | String          | No       | Subtitle of the content item.                          |
+| `item_summary`  | String          | No       | Brief summary of the content.                          |
+| `item_image`    | String          | No       | URL to an image associated with the content.           |
+| `item_url`      | String          | No       | URL to the original content.                           |
+| `item_file`     | String          | No       | URL to a file associated with the content.             |
+| `item_number`   | String          | No       | Identifying number for the content item.               |
+| `item_extra`    | String          | No       | Additional information about the content item.         |
+| `item_tags`     | Array or String | No       | Tags associated with the content.                      |
+
+#### Author and Publishing Information
+
+| Field              | Type            | Required | Description                                            |
+| ------------------ | --------------- | -------- | ------------------------------------------------------ |
+| `author`           | Array or String | No       | Author(s) of the content.                              |
+| `isbn`             | String          | No       | ISBN if content is from a book.                        |
+| `publication_date` | String          | No       | Date when the content was published (YYYY-MM-DD).      |
+| `producer_id`      | String          | No       | ID of the content producer.                            |
+| `denomination`     | String          | No       | Religious denomination (if applicable).                |
+| `pub_type`         | String          | No       | Publication type.                                      |
+| `hosted_url`       | String          | No       | URL where the content is hosted.                       |
+| `pages`       | String          | No       | Number of pages (for documents).                       |
+| `duration`       | String          | No       | Duration (for audio/video content).                       |
+
+#### Hierarchical Structure (for organized content)
+
+| Field         | Type   | Required | Description                        |
+| ------------- | ------ | -------- | ---------------------------------- |
+| `h2_title`    | String | No       | Title for level 2 heading/section. |
+| `h2_subtitle` | String | No       | Subtitle for level 2 heading.      |
+| `h2_image`    | String | No       | Image URL for level 2 section.     |
+| `h2_url`    | String | No       | URL for level 2 heading/section.     |
+| `h2_file`    | String | No       | File URL for level 2 heading/section.     |
+| `h2_summary`    | String | No       | 	Summary for level 2 heading/section.     |
+| `h2_number`    | String | No       | Number for level 2 heading/section.     |
+| `h2_extra`    | String | No       | 	Additional info for level 2 heading/section.     |
+| `h3_title`    | String | No       | Title for level 3 heading/section. |
+| `h3_subtitle` | String | No       | Subtitle for level 3 heading.      |
+| `h3_image`    | String | No       | Image URL for level 3 section.     |
+| `h3_url`    | String | No       | URL for level 3 heading/section.     |
+| `h3_file`    | String | No       | File URL for level 3 heading/section.     |
+| `h3_summary`    | String | No       | 	Summary for level 3 heading/section.     |
