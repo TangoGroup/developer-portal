@@ -1,0 +1,72 @@
+---
+title: 'Supported Models'
+description: 'A full list of Gloo AI API models and their capabilities.'
+---
+
+The Gloo AI platform provides access to a wide range of leading models from various providers. This page serves as the single source of truth for all available models, their context windows, and key capabilities. Use the `Model ID` from this table in your API requests where applicable.
+
+## Anthropic
+
+| Model ID                                     | Max Tokens | Tool Use | Streaming |
+| ---------------------------------------------- | ---------- | -------- | --------- |
+| `anthropic.claude-3-5-sonnet-20240620-v1:0`     | 200,000    | Yes      | Yes * |
+| `us.anthropic.claude-3-5-sonnet-20240620-v1:0`   | 200,000    | Yes      | Yes * |
+| `us.anthropic.claude-3-5-sonnet-20241022-v2:0`   | 200,000    | Yes      | Yes * |
+| `us.anthropic.claude-3-opus-20240229-v1:0`       | 200,000    | Yes      | Yes       |
+| `anthropic.claude-3-sonnet-20240229-v1:0`      | 200,000    | Yes      | Yes       |
+| `anthropic.claude-3-haiku-20240307-v1:0`       | 200,000    | Yes      | Yes       |
+| `anthropic.claude-v2:1`                        | 100,000    | No       | Yes       |
+| `anthropic.claude-instant-v1`                  | 100,000    | No       | Yes       |
+
+<Info>
+(*) The `claude-3-5-sonnet` models support streaming for tool use but may not adhere to the official OpenAI SDK standard for this feature.
+</Info>
+
+## Meta
+
+| Model ID                                     | Max Tokens | Tool Use | Streaming |
+| ---------------------------------------------- | ---------- | -------- | --------- |
+| `meta.llama3-70b-instruct-v1:0`                | 128,000    | Yes      | Yes       |
+| `meta.llama3-8b-instruct-v1:0`                 | 128,000    | Yes      | Yes       |
+| `us.meta.llama3-1-70b-instruct-v1:0`           | 128,000    | Yes      | Yes       |
+| `us.meta.llama3-3-70b-instruct-v1:0`           | 128,000    | Yes      | Yes       |
+
+## Mistral
+
+| Model ID                                     | Max Tokens | Tool Use | Streaming |
+| ---------------------------------------------- | ---------- | -------- | --------- |
+| `mistral.mistral-large-2402-v1:0`              | 65,536     | Yes      | Yes       |
+| `mistral.mixtral-8x7b-instruct-v0:1`           | 32,768     | Yes      | Yes       |
+| `mistral.mistral-small-2402-v1:0`              | 32,768     | Yes      | Yes       |
+| `mistral.mistral-7b-instruct-v0:2`             | 32,768     | Yes      | Yes       |
+
+## Amazon
+
+| Model ID                                     | Max Tokens | Tool Use | Streaming |
+| ---------------------------------------------- | ---------- | -------- | --------- |
+| `amazon.titan-text-premier-v1:0`               | 30,720     | Check API| Yes       |
+| `amazon.titan-text-express-v1`                 | 8,192      | No       | Yes       |
+| `amazon.titan-text-lite-v1`                    | 4,096      | No       | Yes       |
+| `amazon.nova-micro-v1:0`                       | 2,048      | Yes      | Yes * |
+
+## Cohere
+
+| Model ID                                     | Max Tokens | Tool Use | Streaming |
+| ---------------------------------------------- | ---------- | -------- | --------- |
+| `cohere.command-r-plus-v1:0`                   | 128,000    | Yes      | Yes       |
+| `cohere.command-r-v1:0`                        | 128,000    | Yes      | Yes       |
+| `cohere.command-text-v14`                      | 8,192      | No       | Yes       |
+
+## AI21 Labs
+
+| Model ID                                     | Max Tokens | Tool Use | Streaming |
+| ---------------------------------------------- | ---------- | -------- | --------- |
+| `ai21.jamba-instruct-v1:0`                     | 8,192      | Yes      | Yes       |
+| `ai21.jamba-1-5-large-v1:0`                    | 8,192      | Yes      | Yes       |
+| `ai21.jamba-1-5-mini-v1:0`                     | 8,192      | Yes      | Yes       |
+
+## DeepSeek
+
+| Model ID                                     | Max Tokens | Tool Use | Streaming |
+| ---------------------------------------------- | ---------- | -------- | --------- |
+| `us.deepseek.r1-v1:0`                          | 16,000     | Check API| Check API |

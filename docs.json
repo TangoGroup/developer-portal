@@ -15,102 +15,80 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Documentation",
+        "tab": "Guides",
         "groups": [
           {
             "group": "Get Started",
-            "icon": "rocket-launch",
             "pages": [
-              "docs/ai/overview",
-              "docs/ai/quickstart-for-publishers",
-              "docs/ai/quickstart-for-developers"
+              "getting-started/overview",
+              "getting-started/quickstart-admins",
+              "getting-started/quickstart-publishers",
+              "getting-started/quickstart-developers"
             ]
           },
           {
-            "group": "Documentation",
-            "icon": "books",
+            "group": "Platform Concepts",
             "pages": [
-              {
-                "group": "Gloo AI Account",
-                "pages": [
-                  "docs/ai/gloo-ai-account",
-                  "docs/ai/signing-up"
-                ]
-              },
-              {
-                "group": "Studio",
-                "pages": [
-                  "docs/ai/gloo-ai-studio",
-                  {
-                    "group": "Organizations & Publishers",
-                    "pages": [
-                      "docs/ai/organizations",
-                      "docs/ai/what-is-an-organization-1",
-                      "docs/ai/creating-your-organization-1",
-                      "docs/ai/managing-your-organization-1",
-                      "docs/ai/creatingmanaging-publishers",
-                      "docs/ai/invitingmanaging-users"
-                    ]
-                  },
-                  {
-                    "group": "Data Engine",
-                    "pages": [
-                      "docs/ai/data-engine",
-                      "docs/ai/upload-your-data",
-                      "docs/ai/enrich-your-data"
-                    ]
-                  },
-                  {
-                    "group": "APIs",
-                    "pages": [
-                      "docs/ai/generating-api-credentials",
-                      "docs/ai/real-time-api",
-                      "docs/ai/completions-api",
-                      "docs/ai/tools-for-completions",
-                      "docs/ai/chat-api-threads",
-                      "docs/ai/search",
-                      "docs/ai/paywall"
-                    ]
-                  },
-                  {
-                    "group": "AI Components",
-                    "pages": [
-                      "docs/ai/ai-components",
-                      "docs/ai/ai-discovery"
-                    ]
-                  },
-                  "docs/ai/ai-assistants"
-                ]
-              },
-              "docs/ai/chat-1"
+              "platform-concepts/overview",
+              "platform-concepts/orgs-and-publishers",
+              "platform-concepts/authors-and-users"
             ]
           },
           {
-            "group": "Learn More ",
-            "icon": "circle-info",
+            "group": "Studio User Guide",
             "pages": [
-              {
-                "group": "What is Gloo AI?",
-                "pages": [
-                  "docs/ai/getting-started",
-                  "docs/ai/open",
-                  "docs/ai/trust",
-                  "docs/ai/licensing"
-                ]
-              },
-              "docs/ai/why-gloo-ai",
-              "docs/ai/benchmarking",
-              "docs/ai/our-llm"
+              "studio/overview",
+              "studio/manage-organizations",
+              "studio/manage-content",
+              "studio/manage-api-credentials",
+              "studio/manage-components",
+              "studio/manage-assistants"
+            ]
+          },
+          {
+            "group": "Product Guides",
+            "pages": [
+              "product-guides/data-engine",
+              "product-guides/chat",
+              "product-guides/assistants",
+              "product-guides/licensing"
+            ]
+          },
+          {
+            "group": "API Guides",
+            "pages": [
+              "api-guides/overview",
+              "api-guides/ingestion",
+              "api-guides/search",
+              "api-guides/supported-models",
+              "api-guides/completions",
+              "api-guides/tool-use",
+              "api-guides/chat"
+            ]
+          },
+          {
+            "group": "Learn More",
+            "pages": [
+              "learn-more/about-gloo-ai",
+              "learn-more/open",
+              "learn-more/trust",
+              "learn-more/benchmarking"
             ]
           },
           {
             "group": "External",
             "icon": "arrow-up-right-from-square",
-            "pages": [
-              "faithstack"
-            ]
+            "pages": ["faithstack"]
           }
         ]
+      },
+      {
+        "tab": "Tutorials",
+        "pages": ["tutorials/overview"]
+      },
+      {
+        "tab": "Best Practices",
+        "pages": ["best-practices/overview"]
       },
       {
         "tab": "API Reference",
@@ -154,5 +132,18 @@
         ]
       }
     ]
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "mailto:hello@gloo.us"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Gloo AI Studio",
+      "href": "https://studio.ai.gloo.com/"
+    }
   }
 }

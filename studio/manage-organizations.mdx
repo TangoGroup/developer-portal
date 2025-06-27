@@ -1,0 +1,66 @@
+---
+title: 'Manage Organizations'
+description: 'A guide for Organization Admins.'
+---
+
+As an Organization Admin, you are responsible for the core setup and administration of your Gloo AI environment. The "Manage Organizations" section of Studio is your central hub for these tasks.
+
+This guide covers the two primary actions you will take:
+- **Managing Publishers:** Creating, editing, and configuring the publishers within your organization.
+- **Managing Users:** Inviting team members and assigning them appropriate roles.
+
+To get started, click on your user account in the bottom-left of the screen and select "Manage Organizations" from the menu.
+
+---
+
+## Managing Publishers
+
+Publishers are the distinct content entities within your organization. When you upload data, you will need to include a publisher. This allows the flexibility for you to manage the right of your organization by author or division. You must create at least one publisher before you can upload data with Data Engine.
+
+### Creating a New Publisher
+
+From the "Manage Organizations" screen, click the "View Publishers" button for your organization, and then press the  "Create New Publisher" button. This will open a modal with four sections to complete:
+
+1.  **Basic:** The `Name` of the publisher is required.
+2.  **Logos:** You can upload logos that will be securely stored and used in products like Gloo AI Chat.
+3.  **Hierarchy:** This field can be left blank, but it is used to denote a sub-publisher within a publisher.
+4.  **DRM (Digital Rights Management):** This is a critical step.
+    - Checking "Aspen" allows your data to be used in Chat's Sources.
+    - Checking "Kalm" enables it to be used for Gloo AI's LLM (large language model) training.
+
+![Create New Publisher Modal](https://files.readme.io/0c201ded609efe93199445f92185bbad48762eaf2675d9eecdbdb71f72be3224-CreatingPublisher.gif)
+
+
+### Editing an Existing Publisher
+
+Once a publisher has been created, you can edit their details at any time.
+
+1.  Navigate to the "Manage Organizations" page.
+2.  In your organization's row, click on "View Publishers".
+3.  Find the publisher you wish to edit and click the **Edit** icon on the far right of its row.
+
+---
+
+## Managing Users
+
+You can invite your team members to access Studio and grant them permissions to perform specific actions like uploading data, analyzing ingested data, and creating API credentials.
+
+### User Roles
+
+When inviting a user, you must assign them a role:
+
+-   **Admin:** Can invite users, create publishers, and upload data in Data Engine.
+-   **Editor:** Can upload data in Data Engine.
+-   **Viewer:** Can view ingestion analytics and use components.
+
+### Inviting a New User
+
+To invite a user, press the "Manage Users" button from the main organization management screen for your organization. Next, press the "Invite User" button. Fill out their email information and select the role they will receive.
+
+![Invite Users Screen](https://files.readme.io/4043ec7df6ff76872de4d282aecf4043392dad4145457e56f6dfc7d5e5dc4c35-InvitingUsers2.gif)
+
+### The Invitation Process
+
+1.  The invited user will receive an email from `no-reply@gloo.ai`.
+2.  Pressing the link in the email will take them to the Sign In page.
+3.  Once they have signed in, they will see a message to accept the invitation to join the organization. After accepting, they will have access to Studio based on the role you assigned them.
