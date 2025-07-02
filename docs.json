@@ -83,53 +83,88 @@
         ]
       },
       {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Gloo AI",
+            "pages": [
+              {
+                "group": "chat",
+                "pages": [
+                  "api-reference/chat/create-chat",
+                  "api-reference/chat/get-chat",
+                  "api-reference/chat/update-chat",
+                  "api-reference/chat/delete-chat",
+                  "api-reference/chat/list-chats",
+                  "api-reference/chat/post-message",
+                  "api-reference/chat/update-message",
+                  "api-reference/chat/delete-message",
+                  "api-reference/chat/send-message-kallm",
+                  "api-reference/chat/delete-user"
+                ]
+              },
+              {
+                "group": "studio",
+                "pages": [
+                  "api-reference/studio/post-completions",
+                  "api-reference/studio/get-models"
+                ]
+              },
+              {
+                "group": "data",
+                "pages": [
+                  "api-reference/data/search-publisher-data",
+                  "api-reference/data/retrieve-sources",
+                  "api-reference/data/list-available-collections",
+                  "api-reference/data/list-available-publishers",
+                  "api-reference/data/list-available-tenants"
+                ]
+              },
+              {
+                "group": "core",
+                "pages": [
+                  "api-reference/core/paywall",
+                  "api-reference/core/search",
+                  "api-reference/core/extract-intent-from-query",
+                  "api-reference/core/generate"
+                ]
+              },
+              {
+                "group": "answers",
+                "pages": [
+                  "api-reference/answers/generate-response-answer-stream"
+                ]
+              },
+              {
+                "group": "content",
+                "pages": ["api-reference/content/paywall-related-endpoint"]
+              },
+              {
+                "group": "sotc",
+                "pages": [
+                  "api-reference/sotc/analysis",
+                  "api-reference/sotc/question-answers-analysis",
+                  "api-reference/sotc/church-metrics-ai-insights"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Data Engine",
+            "openapi": {
+              "source": "/openapi/deopenapi.json",
+              "directory": "api-reference"
+            }
+          }
+        ]
+      },
+      {
         "tab": "Tutorials",
         "pages": ["tutorials/overview"]
       },
       {
         "tab": "Best Practices",
         "pages": ["best-practices/overview"]
-      },
-      {
-        "tab": "API Reference",
-        "anchors": [
-          {
-            "anchor": "Gloo AI",
-            "icon": "microchip-ai",
-            "groups": [
-              {
-                "group": "Gloo AI",
-                "openapi": {
-                  "source": "/api-reference/ai/aiapiopenapi.json",
-                  "directory": "api-reference"
-                }
-              },
-              {
-                "group": "Data Engine",
-                "openapi": {
-                  "source": "/api-reference/data-engine/deopenapi.json",
-                  "directory": "api-reference"
-                }
-              }
-            ]
-          },
-          {
-            "anchor": "Impact",
-            "icon": "chart-line",
-            "openapi": {
-              "source": "/api-reference/impact/impact-public-api-openapi.yaml",
-              "directory": "api-reference"
-            }
-          },
-          {
-            "anchor": "Platform",
-            "icon": "layer-group",
-            "openapi": {
-              "source": "/api-reference/accounts/accounts.yaml",
-              "directory": "api-reference"
-            }
-          }
-        ]
       }
     ]
   },
