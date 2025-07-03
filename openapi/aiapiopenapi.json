@@ -116,7 +116,7 @@
                       "message_id": "m62a91f80-f9f5-40ed-bd59-d7ce04b06de5",
                       "timestamp": "2025-02-05T00:16:19.856265",
                       "role": "kallm",
-                      "message": "My name is KALLM, and I'm here to assist you!"
+                      "message": "My name is Gloo AI Chat, and I'm here to assist you!"
                     }
                   ]
                 }
@@ -413,7 +413,7 @@
                 "example": {
                   "query_id": "q3c870f25-63fc-451f-a9ce-9a5abed55aa0",
                   "message_id": "mbc51c1d8-29e7-416f-85fc-9f4209d9887b",
-                  "message": "My name is KALLM, and I'm here to assist you!",
+                  "message": "My name is Gloo AI Chat, and I'm here to assist you!",
                   "timestamp": "2025-02-04T23:55:03.573767"
                 }
               }
@@ -606,7 +606,7 @@
     "/ai/{v}/message/kallm": {
       "post": {
         "tags": ["chat"],
-        "summary": "Send message KaLLM",
+        "summary": "Post message KaLLM",
         "operationId": "post-message-kallm",
         "parameters": [
           {
@@ -707,7 +707,7 @@
                 "example": {
                   "query_id": "q3c870f25-63fc-451f-a9ce-9a5abed55aa0",
                   "message_id": "mbc51c1d8-29e7-416f-85fc-9f4209d9887b",
-                  "message": "My name is KALLM, and I'm here to assist you!",
+                  "message": "My name is Gloo AI Chat, and I'm here to assist you!",
                   "timestamp": "2025-02-04T23:55:03.573767"
                 }
               }
@@ -1164,7 +1164,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "title": "Response Search Ai V1 Kallm Search Post"
+                  "title": "Response Search Ai V1 Gloo AI Chat Search Post"
                 }
               }
             }
@@ -1288,7 +1288,7 @@
               "application/json": {
                 "schema": {
                   "type": "string",
-                  "title": "Response Generate Response Answer Stream Ai V1 Kallm Generate Answers Stream Post"
+                  "title": "Response Generate Response Answer Stream Ai V1 Gloo AI Chat Generate Answers Stream Post"
                 }
               },
               "text/plain": {
@@ -1448,7 +1448,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "title": "Response Question Answers Analysis Ai V1 Kallm Sotc Question Answers Analysis Post"
+                  "title": "Response Question Answers Analysis Ai V1 Gloo AI Chat Sotc Question Answers Analysis Post"
                 }
               }
             }

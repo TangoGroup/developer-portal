@@ -113,7 +113,7 @@
               "api-reference/chat/post-message",
               "api-reference/chat/update-message",
               "api-reference/chat/delete-message",
-              "api-reference/chat/send-message-kallm",
+              "api-reference/chat/post-message-kallm",
               "api-reference/chat/delete-user"
             ]
           },
@@ -122,17 +122,7 @@
             "pages": ["api-reference/studio/post-completions"]
           },
           {
-            "group": "Data",
-            "pages": [
-              "api-reference/data/list-available-collections",
-              "api-reference/data/list-available-publishers",
-              "api-reference/data/list-available-tenants",
-              "api-reference/data/search-publisher-data",
-              "api-reference/data/retrieve-sources"
-            ]
-          },
-          {
-            "group": "Search",
+            "group": "Search & Generate",
             "pages": [
               "api-reference/core/search",
               "api-reference/core/extract-intent-from-query",
@@ -140,14 +130,6 @@
               "api-reference/answers/generate-response-answer-stream",
               "api-reference/core/paywall",
               "api-reference/content/paywall-related-endpoint"
-            ]
-          },
-          {
-            "group": "Analytics",
-            "pages": [
-              "api-reference/sotc/analysis",
-              "api-reference/sotc/question-answers-analysis",
-              "api-reference/sotc/church-metrics-ai-insights"
             ]
           }
         ]
