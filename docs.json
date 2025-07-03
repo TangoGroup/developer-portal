@@ -83,53 +83,64 @@
         ]
       },
       {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "General",
+            "pages": [
+              "api-reference/general/overview",
+              "api-reference/general/errors",
+              "api-reference/general/limits"
+            ]
+          },
+          {
+            "group": "Models",
+            "pages": ["api-reference/studio/get-models"]
+          },
+          {
+            "group": "Chat",
+            "pages": [
+              "api-reference/chat/create-chat",
+              "api-reference/chat/get-chat",
+              "api-reference/chat/update-chat",
+              "api-reference/chat/delete-chat",
+              "api-reference/chat/list-chats"
+            ]
+          },
+          {
+            "group": "Messages",
+            "pages": [
+              "api-reference/chat/post-message",
+              "api-reference/chat/update-message",
+              "api-reference/chat/delete-message",
+              "api-reference/chat/post-message-kallm",
+              "api-reference/chat/delete-user"
+            ]
+          },
+          {
+            "group": "Completions",
+            "pages": ["api-reference/studio/post-completions"]
+          },
+          {
+            "group": "Search & Generate",
+            "pages": [
+              "api-reference/core/search",
+              "api-reference/core/extract-intent-from-query",
+              "api-reference/core/generate",
+              "api-reference/answers/generate-response-answer-stream",
+              "api-reference/core/paywall",
+              "api-reference/content/paywall-related-endpoint"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "Tutorials",
         "pages": ["tutorials/overview"]
       },
       {
         "tab": "Best Practices",
         "pages": ["best-practices/overview"]
-      },
-      {
-        "tab": "API Reference",
-        "anchors": [
-          {
-            "anchor": "Gloo AI",
-            "icon": "microchip-ai",
-            "groups": [
-              {
-                "group": "Gloo AI",
-                "openapi": {
-                  "source": "/api-reference/ai/aiapiopenapi.json",
-                  "directory": "api-reference"
-                }
-              },
-              {
-                "group": "Data Engine",
-                "openapi": {
-                  "source": "/api-reference/data-engine/deopenapi.json",
-                  "directory": "api-reference"
-                }
-              }
-            ]
-          },
-          {
-            "anchor": "Impact",
-            "icon": "chart-line",
-            "openapi": {
-              "source": "/api-reference/impact/impact-public-api-openapi.yaml",
-              "directory": "api-reference"
-            }
-          },
-          {
-            "anchor": "Platform",
-            "icon": "layer-group",
-            "openapi": {
-              "source": "/api-reference/accounts/accounts.yaml",
-              "directory": "api-reference"
-            }
-          }
-        ]
       }
     ]
   },

@@ -1,0 +1,24 @@
+---
+openapi: post /ai/{v}/message
+description: 'Start or continue a chat session.'
+---
+
+By providing `chat_id` a new message will be added to the chat session. If no `chat_id` is provided, a new chat session will be created.
+
+Default behavior:
+* Gloo AI will perform a sentiment analysis on your prompt.
+* Gloo AI will provide suggestion follow ups
+* Depending on your prompt, Gloo AI will return sources that have influenced the response from our trusted partners.
+
+You can choose to override the defaults with the query params: `intent`, `enable_sources`, `enable_suggestions`.
+
+**Example 1**:
+You want a rich answer that is based on trusted sources and provides you follow up suggestions. Omit all query params.
+
+**Example 2**:
+You know that your prompt is going to require trusted sources as a part of the answer. You also want to not have follow up suggestions.
+`intent`: 1, `enable_suggestions`: 0
+
+**Example 3**:
+You know that your prompt is not going to require trusted sources. You also want to not have follow up suggestions.
+`intent`: 0, `enable_suggestions`: 0

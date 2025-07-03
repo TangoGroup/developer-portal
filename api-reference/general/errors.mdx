@@ -1,0 +1,117 @@
+---
+title: Errors
+description: 'Common error codes and responses.'
+---
+
+When interacting with the Gloo AI API, it's important to handle potential errors gracefully. We use standard HTTP status codes to indicate the success or failure of an API request. This guide covers the most common error codes you may encounter.
+
+## HTTP Status Codes
+
+| Status Code | Meaning                  | Description                                                                                             |
+| ----------- | ------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `200 OK`    | Success                  | The request was successful. The response body will contain the requested data.                        |
+| `400 Bad Request` | Bad Request              | The request was malformed. This could be due to missing required fields or invalid data types.        |
+| `401 Unauthorized` | Unauthorized             | The request lacks valid authentication credentials. This usually means the `Authorization` header is missing or the token is expired. |
+| `403 Forbidden` | Forbidden                | The authenticated user does not have permission to perform the requested action.                      |
+| `422 Unprocessable Entity` | Unprocessable Entity     | The request was well-formed, but the server was unable to process it due to semantic errors (e.g., invalid value for a specific field). |
+
+---
+
+## Common Error Scenarios & Responses
+
+### Authentication Errors
+
+These errors occur when there's an issue with your API key or bearer token. They can apply to any endpoint.
+
+#### 401 Unauthorized
+
+This error is returned when the `Authorization` header is missing from your request.
+
+```json
+{
+  "error": "Missing Authorization",
+  "code": "unauthorized_missing_authorization"
+}
+````
+
+#### 403 Forbidden
+
+This error is returned when your token is valid, but the associated user or API key does not have the necessary permissions for the requested resource.
+
+```json
+{
+  "error": "Forbidden - insufficient permissions",
+  "code": "forbidden"
+}
+```
+
+### Validation Errors
+
+These errors typically return a `422 Unprocessable Entity` or `400 Bad Request` status code and indicate a problem with the parameters or body of your request.
+
+#### Missing a Required Parameter
+
+Occurs when a required query parameter (like `chat_id` or `message_id`) is not included in the request.
+
+```json
+{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": ["query", "chat_id"],
+      "msg": "Field required",
+      "input": null
+    }
+  ]
+}
+```
+
+#### Invalid Enum Value
+
+Occurs when you provide a value for a field that is not in the list of allowed values (e.g., providing an invalid `chat_field` when updating a chat).
+
+```json
+{
+  "detail": [
+    {
+      "type": "enum",
+      "loc": ["query", "chat_field"],
+      "msg": "Input should be 'pin', 'title' or 'summary'",
+      "input": "notvalid",
+      "ctx": {
+        "expected": "'pin', 'title' or 'summary'"
+      }
+    }
+  ]
+}
+```
+
+#### Invalid Data Type or Value
+
+Occurs when the value for a field is of the wrong type (e.g., sending a string for a boolean `pin` field).
+
+```json
+{
+  "detail": "Invalid value"
+}
+```
+
+### Resource Not Found Errors
+
+These errors occur when you try to act on a resource that doesn't exist or has already been deleted.
+
+#### Failed to Find Resource
+
+Occurs when trying to delete or update a resource (like a chat or message) with an ID that does not exist.
+
+````json
+{
+  "detail": "Failed to find chat"
+}
+````
+
+```json
+{
+  "detail": "Failed to find message"
+}
+````
