@@ -1,0 +1,57 @@
+---
+title: 'Overview'
+description: ''
+---
+
+Welcome to the Gloo AI API! This reference documentation will help you build powerful applications by integrating directly with our platform's core capabilities, from conversational AI to content management.
+
+Our API is built on standard REST principles, uses predictable resource-oriented URLs, and returns JSON-encoded responses.
+
+---
+
+## Authentication
+
+All requests to the Gloo AI API must be authenticated. We use **Bearer Tokens** for authentication, which you can generate from a Client ID and Secret.
+
+You must include your token in the `Authorization` header with every request.
+
+```bash
+curl "https://platform.ai.gloo.com/ai/v1/..." \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+````
+
+<Info>
+To generate your first API access token, please follow the [**Managing API Credentials in Studio**](/studio/manage-api-credentials) guide.
+</Info>
+
+-----
+
+## Base URL
+
+All API endpoints are relative to the following base URL:
+
+```
+https://platform.ai.gloo.com/ai/v1
+```
+
+-----
+
+## Error Handling
+
+The Gloo AI API uses conventional HTTP response codes to indicate the success or failure of a request.
+
+  - Codes in the `2xx` range indicate success.
+  - Codes in the `4xx` range indicate a client-side error (e.g., a missing parameter, bad authentication).
+  - Codes in the `5xx` range indicate a server-side error on our end.
+
+For a detailed list of all possible error codes and their meanings, please see our [**API Errors Guide**](/api-reference/general/errors).
+
+-----
+
+## Getting Started: Your First Steps
+
+Ready to build? Here’s how to get started:
+
+1.  **Get Your API Key:** Follow the [authentication guide](/studio/manage-api-credentials) to generate your first key in the Studio.
+2.  **Review the Guides:** Familiarize yourself with our core [API Guides](/api-guides/overview) to understand the conceptual models.
+3.  **Make Your First Call:** Explore the endpoints listed in the sidebar and make your first request\!

@@ -1,0 +1,52 @@
+---
+title: Rate Limits
+description: 'Understanding the Gloo AI API rate limits.'
+---
+
+To ensure the stability and fair use of our platform for all users, the Gloo AI API enforces rate limits on incoming requests. These limits define the number of API calls that can be made within a certain period.
+
+## How Rate Limiting Works
+
+Rate limiting is applied on a per-API-key basis. The specific limits depend on your organization's subscription plan. When you exceed the number of allowed requests in a given time window, the API will respond with an HTTP `429 Too Many Requests` error.
+
+## Handling Rate Limits Gracefully
+
+When you receive a `429 Too Many Requests` error, you should pause your requests until the time specified in the `X-RateLimit-Reset` header.
+
+A common strategy for handling rate limits is to implement an **exponential backoff** mechanism. This involves waiting for a progressively longer period between retries.
+
+### Example Error Response
+
+```json
+{
+  "error": "Rate limit exceeded",
+  "code": "too_many_requests"
+}
+````
+
+### Example Exponential Backoff (Pseudocode)
+
+```
+retries = 0
+max_retries = 5
+
+loop:
+  response = make_api_request()
+
+  if response.status_code == 200:
+    // Success!
+    break
+
+  if response.status_code == 429:
+    if retries < max_retries:
+      wait_time = (2 ** retries) + random_jitter()
+      sleep(wait_time)
+      retries += 1
+    else:
+      // Max retries reached, handle error
+      log("Max retries exceeded for rate limit.")
+      break
+  else:
+    // Handle other errors
+    break
+```
