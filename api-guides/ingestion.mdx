@@ -5,48 +5,50 @@ description: 'Guide to uploading text for instant processing and vectorization'
 
 The Real-Time Ingestion API allows developers to upload text content directly for immediate processing and vectorization. Unlike batch upload methods, this API processes content in real-time, making it suitable for dynamic content that needs to be immediately available for search or retrieval.
 
-## API Endpoint
+## Uploading Content
 
-To ingest content, make a POST request to the following endpoint:
+### Prerequisites
 
-```
-POST /ingestion/v1/real_time_upload
-```
+Before making a request, grab your **Publisher ID**:
+1. Navigate to your Organization in Studio.
+2. Click on the "View Publishers" button.
+3. Locate your publisher.
+4. Copy the **Publisher ID** from the page.
 
-```
-Base URL: https://platform.ai.gloo.com
-```
+If you haven't set up a publisher yet, follow the [Create a Publisher](/studio/manage-organizations#creating-a-new-publisher) guide.
 
----
+### Authentication
 
-## Authentication
+You need an API access token to upload content. Follow these steps to obtain one:
+
+1. Visit the [API Credentials page](/studio/manage-api-credentials).
+2. Generate a token using the OAuth2 Client Credentials flow.
+3. Use the generated token in your requests.
 
 The API requires a JWT token with specific claims to authorize access. The token must be associated with a Client ID that has access to the specified publisher. The system validates that the organization associated with your Client ID has permission to access the publisher specified in your request.
-
-### Headers
-
-| Header          | Value                                |
-| --------------- | ------------------------------------ |
-| `Authorization` | `Bearer <your_access_token>`         |
-| `Content-Type`  | `application/json`                   |
-
-### JWT Token Requirements
 
 Your JWT must include the following claims:
 -   A `sub` claim containing your API Client ID.
 -   A `scope` claim that includes `api/access`.
 
-<Info>
-You will only be able to send content to a publisher that belongs to your organization. Please double-check the `publisher_id` field in the request body for accuracy.
-</Info>
+### API request
 
----
+Once you have your publisher id and API access token, you're ready to upload content.
 
-## Request Body
+**Endpoint:** `POST /ingestion/v1/real_time_upload`
+
+#### Example cURL Request
+
+```bash cURL
+curl 'https://platform.ai.gloo.com/ai/ingestion/v1/real_time_upload' -v \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -d '${REQUEST_BODY}'
+```
 
 The request body should be a single JSON object containing the content and any relevant metadata.
 
-### Example Request
+#### Example Request Body
 
 ```json JSON
 {
@@ -96,6 +98,10 @@ The request body should be a single JSON object containing the content and any r
   "pub_type": "technical"
 }
 ```
+
+<Info>
+You will only be able to send content to a publisher that belongs to your organization. Please double-check the `publisher_id` field in the request body for accuracy.
+</Info>
 
 ---
 
