@@ -1,0 +1,17 @@
+---
+openapi: post /ingestion/v1/real_time_upload
+---
+
+## Authentication
+
+The API requires a JWT token with specific claims to authorize access. The token must be associated with a Client ID that has access to the specified publisher. The system validates that the organization associated with your Client ID has permission to access the publisher specified in your request.
+
+### JWT Token Requirements
+
+Your JWT must include the following claims:
+-   A `sub` claim containing your API Client ID.
+-   A `scope` claim that includes `api/access`.
+
+<Info>
+You will only be able to send content to a publisher that belongs to your organization. Please double-check the `publisher_id` field in the request body for accuracy.
+</Info>

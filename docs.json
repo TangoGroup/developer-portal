@@ -122,14 +122,25 @@
             "pages": ["api-reference/studio/post-completions"]
           },
           {
-            "group": "Search & Generate",
+            "group": "Content",
             "pages": [
+              "api-reference/ingestion/real-time-upload",
               "api-reference/core/search",
+              "api-reference/data/search-publisher-data",
+              "api-reference/data/retrieve-sources",
               "api-reference/core/extract-intent-from-query",
               "api-reference/core/generate",
               "api-reference/answers/generate-response-answer-stream",
               "api-reference/core/paywall",
               "api-reference/content/paywall-related-endpoint"
+            ]
+          },
+          {
+            "group": "Analytics",
+            "pages": [
+              "api-reference/sotc/analysis",
+              "api-reference/sotc/church-metrics-ai-insights",
+              "api-reference/sotc/question-answers-analysis"
             ]
           }
         ]
