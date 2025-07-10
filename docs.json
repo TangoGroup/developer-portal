@@ -147,7 +147,7 @@
       },
       {
         "tab": "Tutorials",
-        "pages": ["tutorials/overview"]
+        "pages": ["tutorials/overview", "tutorials/completions"]
       },
       {
         "tab": "Best Practices",
