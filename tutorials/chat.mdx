@@ -1,0 +1,2584 @@
+---
+title: 'Chat'
+description: 'Learn how to create meaningful conversations using the Gloo AI Chat and Message APIs, including session management and response handling.'
+---
+
+This tutorial demonstrates how to build interactive chat experiences using Gloo AI APIs. You'll learn to create chat sessions, send messages, continue conversations, and retrieve chat history.
+
+The Message API allows for:
+- **Persistent conversations** with session management
+- **Contextual responses** that build on previous interactions
+- **Source integration** for grounded, authoritative answers
+- **Streaming responses** for real-time conversation flow
+
+---
+
+## Prerequisites
+
+Before starting, ensure you have:
+- A Gloo AI Studio account
+- Your Client ID and Client Secret from the [API Credentials page](/studio/manage-api-credentials)
+
+---
+
+## Step 1: Authentication Setup
+
+Like other Gloo AI endpoints, the Chat and Message APIs require Bearer token authentication. You'll need to exchange your credentials for an access token first.
+
+<CodeGroup>
+
+```python Python
+import requests
+import time
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+CLIENT_ID = os.getenv("GLOO_CLIENT_ID", "YOUR_CLIENT_ID")
+CLIENT_SECRET = os.getenv("GLOO_CLIENT_SECRET", "YOUR_CLIENT_SECRET")
+TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token"
+
+# Global token storage
+access_token_info = {}
+
+def get_access_token():
+    """Retrieve a new access token from the Gloo AI API."""
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    data = {"grant_type": "client_credentials", "scope": "api/access"}
+    
+    response = requests.post(TOKEN_URL, headers=headers, data=data, auth=(CLIENT_ID, CLIENT_SECRET))
+    response.raise_for_status()
+    
+    token_data = response.json()
+    token_data['expires_at'] = int(time.time()) + token_data['expires_in']
+    
+    return token_data
+
+def is_token_expired(token_info):
+    """Check if the token is expired or close to expiring."""
+    if not token_info or 'expires_at' not in token_info:
+        return True
+    return time.time() > (token_info['expires_at'] - 60)
+
+def ensure_valid_token():
+    """Ensure we have a valid access token."""
+    global access_token_info
+    if is_token_expired(access_token_info):
+        print("Getting new access token...")
+        access_token_info = get_access_token()
+    return access_token_info['access_token']
+```
+
+```javascript JavaScript
+const axios = require('axios');
+require('dotenv').config();
+
+const CLIENT_ID = process.env.GLOO_CLIENT_ID || "YOUR_CLIENT_ID";
+const CLIENT_SECRET = process.env.GLOO_CLIENT_SECRET || "YOUR_CLIENT_SECRET";
+const TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token";
+
+// Global token storage
+let tokenInfo = {};
+
+async function getAccessToken() {
+    const body = 'grant_type=client_credentials&scope=api/access';
+    const response = await axios.post(TOKEN_URL, body, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        auth: { username: CLIENT_ID, password: CLIENT_SECRET }
+    });
+    
+    const tokenData = response.data;
+    tokenData.expires_at = Math.floor(Date.now() / 1000) + tokenData.expires_in;
+    
+    return tokenData;
+}
+
+function isTokenExpired(token) {
+    if (!token || !token.expires_at) return true;
+    return (Date.now() / 1000) > (token.expires_at - 60);
+}
+
+async function ensureValidToken() {
+    if (isTokenExpired(tokenInfo)) {
+        console.log("Getting new access token...");
+        tokenInfo = await getAccessToken();
+    }
+    return tokenInfo.access_token;
+}
+```
+
+```typescript TypeScript
+import axios from 'axios';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+const CLIENT_ID = process.env.GLOO_CLIENT_ID || "YOUR_CLIENT_ID";
+const CLIENT_SECRET = process.env.GLOO_CLIENT_SECRET || "YOUR_CLIENT_SECRET";
+const TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token";
+
+interface TokenInfo {
+    access_token: string;
+    expires_in: number;
+    expires_at: number;
+    token_type: string;
+}
+
+// Global token storage
+let tokenInfo: TokenInfo | null = null;
+
+async function getAccessToken(): Promise<TokenInfo> {
+    const body = 'grant_type=client_credentials&scope=api/access';
+    const response = await axios.post<TokenInfo>(TOKEN_URL, body, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        auth: { username: CLIENT_ID, password: CLIENT_SECRET }
+    });
+    
+    const tokenData = response.data;
+    (tokenData as any).expires_at = Math.floor(Date.now() / 1000) + tokenData.expires_in;
+    
+    return tokenData;
+}
+
+function isTokenExpired(token: TokenInfo | null): boolean {
+    if (!token || !(token as any).expires_at) return true;
+    return (Date.now() / 1000) > ((token as any).expires_at - 60);
+}
+
+async function ensureValidToken(): Promise<string> {
+    if (isTokenExpired(tokenInfo)) {
+        console.log("Getting new access token...");
+        tokenInfo = await getAccessToken();
+    }
+    return tokenInfo!.access_token;
+}
+```
+
+```php PHP
+<?php
+require_once 'vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+$CLIENT_ID = getenv('GLOO_CLIENT_ID') ?: 'YOUR_CLIENT_ID';
+$CLIENT_SECRET = getenv('GLOO_CLIENT_SECRET') ?: 'YOUR_CLIENT_SECRET';
+$TOKEN_URL = 'https://platform.ai.gloo.com/oauth2/token';
+
+// Global token storage
+$tokenInfo = [];
+
+function getAccessToken($clientId, $clientSecret, $tokenUrl) {
+    $postData = 'grant_type=client_credentials&scope=api/access';
+    $ch = curl_init();
+    
+    curl_setopt($ch, CURLOPT_URL, $tokenUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+    curl_setopt($ch, CURLOPT_USERPWD, $clientId . ':' . $clientSecret);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+    
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        throw new Exception(curl_error($ch));
+    }
+    curl_close($ch);
+    
+    $tokenData = json_decode($result, true);
+    $tokenData['expires_at'] = time() + $tokenData['expires_in'];
+    
+    return $tokenData;
+}
+
+function isTokenExpired($token) {
+    if (empty($token) || !isset($token['expires_at'])) {
+        return true;
+    }
+    return time() > ($token['expires_at'] - 60);
+}
+
+function ensureValidToken() {
+    global $tokenInfo, $CLIENT_ID, $CLIENT_SECRET, $TOKEN_URL;
+    
+    if (isTokenExpired($tokenInfo)) {
+        echo "Getting new access token...\n";
+        $tokenInfo = getAccessToken($CLIENT_ID, $CLIENT_SECRET, $TOKEN_URL);
+    }
+    
+    return $tokenInfo['access_token'];
+}
+?>
+```
+
+```go Go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"strings"
+	"time"
+)
+
+var (
+	clientID     = getEnv("GLOO_CLIENT_ID", "YOUR_CLIENT_ID")
+	clientSecret = getEnv("GLOO_CLIENT_SECRET", "YOUR_CLIENT_SECRET")
+	tokenURL     = "https://platform.ai.gloo.com/oauth2/token"
+)
+
+type TokenInfo struct {
+	AccessToken string `json:"access_token"`
+	ExpiresIn   int    `json:"expires_in"`
+	ExpiresAt   int64  `json:"expires_at"`
+	TokenType   string `json:"token_type"`
+}
+
+var tokenInfo *TokenInfo
+
+func getAccessToken() (*TokenInfo, error) {
+	data := strings.NewReader("grant_type=client_credentials&scope=api/access")
+	req, err := http.NewRequest("POST", tokenURL, data)
+	if err != nil {
+		return nil, err
+	}
+
+	req.SetBasicAuth(clientID, clientSecret)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to get token: %s - %s", resp.Status, string(bodyBytes))
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var token TokenInfo
+	if err := json.Unmarshal(body, &token); err != nil {
+		return nil, err
+	}
+
+	token.ExpiresAt = time.Now().Unix() + int64(token.ExpiresIn)
+	return &token, nil
+}
+
+func isTokenExpired(token *TokenInfo) bool {
+	if token == nil || token.ExpiresAt == 0 {
+		return true
+	}
+	return time.Now().Unix() > (token.ExpiresAt - 60)
+}
+
+func ensureValidToken() (string, error) {
+	if isTokenExpired(tokenInfo) {
+		fmt.Println("Getting new access token...")
+		var err error
+		tokenInfo, err = getAccessToken()
+		if err != nil {
+			return "", err
+		}
+	}
+	return tokenInfo.AccessToken, nil
+}
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}
+```
+
+```java Java
+import com.google.gson.Gson;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Instant;
+import java.util.Base64;
+
+public class AuthManager {
+    private static final String CLIENT_ID = System.getenv().getOrDefault("GLOO_CLIENT_ID", "YOUR_CLIENT_ID");
+    private static final String CLIENT_SECRET = System.getenv().getOrDefault("GLOO_CLIENT_SECRET", "YOUR_CLIENT_SECRET");
+    private static final String TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token";
+    
+    private static TokenInfo tokenInfo;
+    private static final HttpClient httpClient = HttpClient.newHttpClient();
+    private static final Gson gson = new Gson();
+    
+    public static class TokenInfo {
+        public String access_token;
+        public int expires_in;
+        public long expires_at;
+        public String token_type;
+    }
+    
+    public static TokenInfo getAccessToken() throws IOException, InterruptedException {
+        String auth = CLIENT_ID + ":" + CLIENT_SECRET;
+        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+        String requestBody = "grant_type=client_credentials&scope=api/access";
+        
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(TOKEN_URL))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .header("Authorization", "Basic " + encodedAuth)
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+        
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        
+        if (response.statusCode() != 200) {
+            throw new IOException("Failed to get access token: " + response.body());
+        }
+        
+        TokenInfo token = gson.fromJson(response.body(), TokenInfo.class);
+        token.expires_at = Instant.now().getEpochSecond() + token.expires_in;
+        
+        return token;
+    }
+    
+    public static boolean isTokenExpired(TokenInfo token) {
+        if (token == null || token.expires_at == 0) {
+            return true;
+        }
+        return Instant.now().getEpochSecond() > (token.expires_at - 60);
+    }
+    
+    public static String ensureValidToken() throws IOException, InterruptedException {
+        if (isTokenExpired(tokenInfo)) {
+            System.out.println("Getting new access token...");
+            tokenInfo = getAccessToken();
+        }
+        return tokenInfo.access_token;
+    }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Step 2: Creating a Chat Session
+
+The Message API can either create a new chat session or continue an existing one. When you don't provide a `chat_id`, it automatically creates a new session.
+
+<CodeGroup>
+
+```python Python
+MESSAGE_API_URL = "https://platform.ai.gloo.com/ai/v1/message"
+
+def create_chat_session(initial_message):
+    """Create a new chat session with an initial message."""
+    token = ensure_valid_token()
+    
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    
+    # Request body for new chat (no chat_id provided)
+    payload = {
+        "query": initial_message,
+        "character_limit": 1000,
+        "sources_limit": 5,
+        "stream": False,
+        "publishers": [],
+        "enable_suggestions": 1  # Enable suggested follow-up questions
+    }
+    
+    response = requests.post(MESSAGE_API_URL, headers=headers, json=payload)
+    response.raise_for_status()
+    
+    return response.json()
+
+# Example usage
+initial_question = "How can I find meaning and purpose when facing life's greatest challenges?"
+chat_response = create_chat_session(initial_question)
+
+print("Chat created successfully!")
+print(f"Chat ID: {chat_response['chat_id']}")
+print(f"Message ID: {chat_response['message_id']}")
+print(f"Response: {chat_response['message']}")
+
+# Show suggested follow-up questions
+if chat_response.get('suggestions'):
+    print("\nSuggested follow-up questions:")
+    for i, suggestion in enumerate(chat_response['suggestions'], 1):
+        print(f"{i}. {suggestion}")
+```
+
+```javascript JavaScript
+const MESSAGE_API_URL = "https://platform.ai.gloo.com/ai/v1/message";
+
+async function createChatSession(initialMessage) {
+    const token = await ensureValidToken();
+    
+    const payload = {
+        query: initialMessage,
+        character_limit: 1000,
+        sources_limit: 5,
+        stream: false,
+        publishers: [],
+        enable_suggestions: 1  // Enable suggested follow-up questions
+    };
+    
+    const response = await axios.post(MESSAGE_API_URL, payload, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    
+    return response.data;
+}
+
+// Example usage
+const initialQuestion = "How can I find meaning and purpose when facing life's greatest challenges?";
+const chatResponse = await createChatSession(initialQuestion);
+
+console.log("Chat created successfully!");
+console.log(`Chat ID: ${chatResponse.chat_id}`);
+console.log(`Message ID: ${chatResponse.message_id}`);
+console.log(`Response: ${chatResponse.message}`);
+
+// Show suggested follow-up questions
+if (chatResponse.suggestions) {
+    console.log("\nSuggested follow-up questions:");
+    chatResponse.suggestions.forEach((suggestion, index) => {
+        console.log(`${index + 1}. ${suggestion}`);
+    });
+}
+```
+
+```typescript TypeScript
+const MESSAGE_API_URL = "https://platform.ai.gloo.com/ai/v1/message";
+
+interface MessageResponse {
+    chat_id: string;
+    query_id: string;
+    message_id: string;
+    message: string;
+    timestamp: string;
+    success: boolean;
+    suggestions?: string[];
+    sources?: any[];
+}
+
+interface MessageRequest {
+    query: string;
+    character_limit?: number;
+    sources_limit?: number;
+    stream?: boolean;
+    publishers?: string[];
+    chat_id?: string;
+    enable_suggestions?: number;
+}
+
+async function createChatSession(initialMessage: string): Promise<MessageResponse> {
+    const token = await ensureValidToken();
+    
+    const payload: MessageRequest = {
+        query: initialMessage,
+        character_limit: 1000,
+        sources_limit: 5,
+        stream: false,
+        publishers: [],
+        enable_suggestions: 1  // Enable suggested follow-up questions
+    };
+    
+    const response = await axios.post<MessageResponse>(MESSAGE_API_URL, payload, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    
+    return response.data;
+}
+
+// Example usage
+const initialQuestion = "How can I find meaning and purpose when facing life's greatest challenges?";
+const chatResponse = await createChatSession(initialQuestion);
+
+console.log("Chat created successfully!");
+console.log(`Chat ID: ${chatResponse.chat_id}`);
+console.log(`Message ID: ${chatResponse.message_id}`);
+console.log(`Response: ${chatResponse.message}`);
+
+// Show suggested follow-up questions
+if (chatResponse.suggestions) {
+    console.log("\nSuggested follow-up questions:");
+    chatResponse.suggestions.forEach((suggestion, index) => {
+        console.log(`${index + 1}. ${suggestion}`);
+    });
+}
+```
+
+```php PHP
+$MESSAGE_API_URL = 'https://platform.ai.gloo.com/ai/v1/message';
+
+function createChatSession($initialMessage) {
+    $token = ensureValidToken();
+    
+    $payload = json_encode([
+        'query' => $initialMessage,
+        'character_limit' => 1000,
+        'sources_limit' => 5,
+        'stream' => false,
+        'publishers' => [],
+        'enable_suggestions' => 1  // Enable suggested follow-up questions
+    ]);
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $GLOBALS['MESSAGE_API_URL']);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $token
+    ]);
+    
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        throw new Exception(curl_error($ch));
+    }
+    curl_close($ch);
+    
+    return json_decode($result, true);
+}
+
+// Example usage
+$initialQuestion = "How can I find meaning and purpose when facing life's greatest challenges?";
+$chatResponse = createChatSession($initialQuestion);
+
+echo "Chat created successfully!\n";
+echo "Chat ID: " . $chatResponse['chat_id'] . "\n";
+echo "Message ID: " . $chatResponse['message_id'] . "\n";
+echo "Response: " . $chatResponse['message'] . "\n";
+
+// Show suggested follow-up questions
+if (!empty($chatResponse['suggestions'])) {
+    echo "\nSuggested follow-up questions:\n";
+    foreach ($chatResponse['suggestions'] as $index => $suggestion) {
+        echo ($index + 1) . ". " . $suggestion . "\n";
+    }
+}
+```
+
+```go Go
+const messageAPIURL = "https://platform.ai.gloo.com/ai/v1/message"
+
+type MessageRequest struct {
+	Query             string   `json:"query"`
+	CharacterLimit    int      `json:"character_limit,omitempty"`
+	SourcesLimit      int      `json:"sources_limit,omitempty"`
+	Stream            bool     `json:"stream,omitempty"`
+	Publishers        []string `json:"publishers,omitempty"`
+	ChatID            string   `json:"chat_id,omitempty"`
+	EnableSuggestions int      `json:"enable_suggestions,omitempty"`
+}
+
+type MessageResponse struct {
+	ChatID      string   `json:"chat_id"`
+	QueryID     string   `json:"query_id"`
+	MessageID   string   `json:"message_id"`
+	Message     string   `json:"message"`
+	Timestamp   string   `json:"timestamp"`
+	Success     bool     `json:"success"`
+	Suggestions []string `json:"suggestions"`
+	Sources     []any    `json:"sources"`
+}
+
+func createChatSession(initialMessage string) (*MessageResponse, error) {
+	token, err := ensureValidToken()
+	if err != nil {
+		return nil, err
+	}
+	
+	payload := MessageRequest{
+		Query:             initialMessage,
+		CharacterLimit:    1000,
+		SourcesLimit:      5,
+		Stream:            false,
+		Publishers:        []string{},
+		EnableSuggestions: 1, // Enable suggested follow-up questions
+	}
+	
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+	
+	req, err := http.NewRequest("POST", messageAPIURL, bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return nil, err
+	}
+	
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
+	
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API call failed: %s - %s", resp.Status, string(body))
+	}
+	
+	var response MessageResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, err
+	}
+	
+	return &response, nil
+}
+
+// Example usage
+initialQuestion := "How can I find meaning and purpose when facing life's greatest challenges?"
+chatResponse, err := createChatSession(initialQuestion)
+if err != nil {
+	fmt.Printf("Error creating chat: %v\n", err)
+	return
+}
+
+fmt.Println("Chat created successfully!")
+fmt.Printf("Query ID: %s\n", chatResponse.QueryID)
+fmt.Printf("Message ID: %s\n", chatResponse.MessageID)
+fmt.Printf("Response: %s\n", chatResponse.Message)
+
+// Show suggested follow-up questions
+if len(chatResponse.Suggestions) > 0 {
+	fmt.Println("\nSuggested follow-up questions:")
+	for i, suggestion := range chatResponse.Suggestions {
+		fmt.Printf("%d. %s\n", i+1, suggestion)
+	}
+}
+```
+
+```java Java
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
+
+public class ChatManager {
+    private static final String MESSAGE_API_URL = "https://platform.ai.gloo.com/ai/v1/message";
+    private static final HttpClient httpClient = HttpClient.newHttpClient();
+    private static final Gson gson = new Gson();
+    
+    public static class MessageRequest {
+        public String query;
+        public Integer character_limit;
+        public Integer sources_limit;
+        public Boolean stream;
+        public List<String> publishers;
+        public String chat_id;
+        public Integer enable_suggestions;
+    }
+    
+    public static class MessageResponse {
+        public String chat_id;
+        public String query_id;
+        public String message_id;
+        public String message;
+        public String timestamp;
+        public Boolean success;
+        public List<String> suggestions;
+        public List<Object> sources;
+    }
+    
+    public static MessageResponse createChatSession(String initialMessage) throws IOException, InterruptedException {
+        String token = AuthManager.ensureValidToken();
+        
+        MessageRequest payload = new MessageRequest();
+        payload.query = initialMessage;
+        payload.character_limit = 1000;
+        payload.sources_limit = 5;
+        payload.stream = false;
+        payload.publishers = List.of();
+        payload.enable_suggestions = 1;  // Enable suggested follow-up questions
+        
+        String jsonPayload = gson.toJson(payload);
+        
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(MESSAGE_API_URL))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .build();
+        
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        
+        if (response.statusCode() != 200) {
+            throw new IOException("API call failed: " + response.body());
+        }
+        
+        return gson.fromJson(response.body(), MessageResponse.class);
+    }
+    
+    // Example usage
+    public static void main(String[] args) {
+        try {
+            String initialQuestion = "How can I find meaning and purpose when facing life's greatest challenges?";
+            MessageResponse chatResponse = createChatSession(initialQuestion);
+            
+            System.out.println("Chat created successfully!");
+            System.out.println("Chat ID: " + chatResponse.chat_id);
+            System.out.println("Message ID: " + chatResponse.message_id);
+            System.out.println("Response: " + chatResponse.message);
+            
+            // Show suggested follow-up questions
+            if (chatResponse.suggestions != null && !chatResponse.suggestions.isEmpty()) {
+                System.out.println("\nSuggested follow-up questions:");
+                for (int i = 0; i < chatResponse.suggestions.size(); i++) {
+                    System.out.println((i + 1) + ". " + chatResponse.suggestions.get(i));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Step 3: Continuing the Conversation
+
+Once you have a chat session, you can continue the conversation by including the `chat_id` from the previous response in your next message request. You don't need to retrieve chat history to continue the conversation - the API maintains context automatically.
+
+<CodeGroup>
+
+```python Python
+def continue_conversation(chat_id, follow_up_message):
+    """Continue an existing chat conversation."""
+    token = ensure_valid_token()
+    
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    
+    # Include chat_id to continue the conversation
+    payload = {
+        "chat_id": chat_id,
+        "query": follow_up_message,
+        "character_limit": 1000,
+        "sources_limit": 5,
+        "stream": False,
+        "publishers": [],
+        "enable_suggestions": 1  # Continue getting suggestions
+    }
+    
+    response = requests.post(MESSAGE_API_URL, headers=headers, json=payload)
+    response.raise_for_status()
+    
+    return response.json()
+
+# Example: Continue the conversation using a suggested response
+# Use the first suggestion from the initial response
+if chat_response.get('suggestions') and len(chat_response['suggestions']) > 0:
+    follow_up = chat_response['suggestions'][0]  # Use first suggested question
+else:
+    follow_up = "Can you give me practical steps I can take today to begin this journey?"
+
+follow_up_response = continue_conversation(chat_response['chat_id'], follow_up)
+
+print("\nFollow-up Response:")
+print(f"Question: {follow_up}")
+print(f"Response: {follow_up_response['message']}")
+```
+
+```javascript JavaScript
+async function continueConversation(chatId, followUpMessage) {
+    const token = await ensureValidToken();
+    
+    const payload = {
+        chat_id: chatId,
+        query: followUpMessage,
+        character_limit: 1000,
+        sources_limit: 5,
+        stream: false,
+        publishers: [],
+        enable_suggestions: 1  // Continue getting suggestions
+    };
+    
+    const response = await axios.post(MESSAGE_API_URL, payload, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    
+    return response.data;
+}
+
+// Example: Continue the conversation with a follow-up
+const followUp = "Can you give me practical steps I can take today to begin this journey?";
+const followUpResponse = await continueConversation(chatResponse.chat_id, followUp);
+
+console.log("\nFollow-up Response:");
+console.log(`Response: ${followUpResponse.message}`);
+```
+
+```typescript TypeScript
+async function continueConversation(chatId: string, followUpMessage: string): Promise<MessageResponse> {
+    const token = await ensureValidToken();
+    
+    const payload: MessageRequest = {
+        chat_id: chatId,
+        query: followUpMessage,
+        character_limit: 1000,
+        sources_limit: 5,
+        stream: false,
+        publishers: []
+    };
+    
+    const response = await axios.post<MessageResponse>(MESSAGE_API_URL, payload, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    
+    return response.data;
+}
+
+// Example: Continue the conversation with a follow-up
+const followUp = "Can you give me practical steps I can take today to begin this journey?";
+const followUpResponse = await continueConversation(chatResponse.chat_id, followUp);
+
+console.log("\nFollow-up Response:");
+console.log(`Response: ${followUpResponse.message}`);
+```
+
+```php PHP
+function continueConversation($chatId, $followUpMessage) {
+    $token = ensureValidToken();
+    
+    $payload = json_encode([
+        'chat_id' => $chatId,
+        'query' => $followUpMessage,
+        'character_limit' => 1000,
+        'sources_limit' => 5,
+        'stream' => false,
+        'publishers' => []
+    ]);
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $GLOBALS['MESSAGE_API_URL']);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $token
+    ]);
+    
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        throw new Exception(curl_error($ch));
+    }
+    curl_close($ch);
+    
+    return json_decode($result, true);
+}
+
+// Example: Continue the conversation with a follow-up
+$followUp = "Can you give me practical steps I can take today to begin this journey?";
+$followUpResponse = continueConversation($chatResponse['chat_id'], $followUp);
+
+echo "\nFollow-up Response:\n";
+echo "Response: " . $followUpResponse['message'] . "\n";
+```
+
+```go Go
+func continueConversation(chatID, followUpMessage string) (*MessageResponse, error) {
+	token, err := ensureValidToken()
+	if err != nil {
+		return nil, err
+	}
+	
+	payload := MessageRequest{
+		ChatID:         chatID,
+		Query:          followUpMessage,
+		CharacterLimit: 1000,
+		SourcesLimit:   5,
+		Stream:         false,
+		Publishers:     []string{},
+	}
+	
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+	
+	req, err := http.NewRequest("POST", messageAPIURL, bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return nil, err
+	}
+	
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
+	
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API call failed: %s - %s", resp.Status, string(body))
+	}
+	
+	var response MessageResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, err
+	}
+	
+	return &response, nil
+}
+
+// Example: Continue the conversation with a follow-up
+followUp := "Can you give me practical steps I can take today to begin this journey?"
+followUpResponse, err := continueConversation(chatResponse.QueryID, followUp)
+if err != nil {
+	fmt.Printf("Error continuing conversation: %v\n", err)
+	return
+}
+
+fmt.Println("\nFollow-up Response:")
+fmt.Printf("Response: %s\n", followUpResponse.Message)
+```
+
+```java Java
+public static MessageResponse continueConversation(String chatId, String followUpMessage) throws IOException, InterruptedException {
+    String token = AuthManager.ensureValidToken();
+    
+    MessageRequest payload = new MessageRequest();
+    payload.chat_id = chatId;
+    payload.query = followUpMessage;
+    payload.character_limit = 1000;
+    payload.sources_limit = 5;
+    payload.stream = false;
+    payload.publishers = List.of();
+    
+    String jsonPayload = gson.toJson(payload);
+    
+    HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(MESSAGE_API_URL))
+            .header("Content-Type", "application/json")
+            .header("Authorization", "Bearer " + token)
+            .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+            .build();
+    
+    HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+    
+    if (response.statusCode() != 200) {
+        throw new IOException("API call failed: " + response.body());
+    }
+    
+    return gson.fromJson(response.body(), MessageResponse.class);
+}
+
+// Example: Continue the conversation with a follow-up
+public static void continueExampleConversation(String chatId) throws IOException, InterruptedException {
+    String followUp = "Can you give me practical steps I can take today to begin this journey?";
+    MessageResponse followUpResponse = continueConversation(chatId, followUp);
+    
+    System.out.println("\nFollow-up Response:");
+    System.out.println("Response: " + followUpResponse.message);
+}
+```
+
+</CodeGroup>
+
+---
+
+## Step 4: Retrieving Chat History (Optional)
+
+If you want to view the complete conversation history, you can retrieve it using the Chat API. This is useful for displaying conversation logs or analyzing chat patterns.
+
+<CodeGroup>
+
+```python Python
+def get_chat_history(chat_id):
+    """Retrieve the complete chat history for a conversation."""
+    token = ensure_valid_token()
+    
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    
+    # Use the chat endpoint to get full conversation history
+    params = {"chat_id": chat_id}
+    
+    response = requests.get(CHAT_API_URL, headers=headers, params=params)
+    response.raise_for_status()
+    
+    return response.json()
+
+# Example: Get chat history after the follow-up conversation
+print("\n" + "="*50)
+print("COMPLETE CONVERSATION HISTORY")
+print("="*50)
+
+chat_history = get_chat_history(chat_response['chat_id'])
+
+# Display the conversation history
+for i, message in enumerate(chat_history.get('messages', []), 1):
+    role = message.get('role', 'unknown')
+    content = message.get('content', '')
+    timestamp = message.get('timestamp', '')
+    
+    print(f"\n{i}. {role.upper()}: {content}")
+    if timestamp:
+        print(f"   Time: {timestamp}")
+```
+
+```javascript JavaScript
+async function getChatHistory(chatId) {
+    const token = await ensureValidToken();
+    
+    const response = await axios.get(CHAT_API_URL, {
+        params: { chat_id: chatId },
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    
+    return response.data;
+}
+
+// Example: Get chat history after the follow-up conversation
+console.log("\n" + "=".repeat(50));
+console.log("COMPLETE CONVERSATION HISTORY");
+console.log("=".repeat(50));
+
+const chatHistory = await getChatHistory(chatResponse.chat_id);
+
+// Display the conversation history
+chatHistory.messages?.forEach((message, index) => {
+    const role = message.role || 'unknown';
+    const content = message.content || '';
+    const timestamp = message.timestamp || '';
+    
+    console.log(`\n${index + 1}. ${role.toUpperCase()}: ${content}`);
+    if (timestamp) {
+        console.log(`   Time: ${timestamp}`);
+    }
+});
+```
+
+```typescript TypeScript
+async function getChatHistory(chatId: string): Promise<ChatHistoryResponse> {
+    const token = await ensureValidToken();
+    
+    const response = await axios.get<ChatHistoryResponse>(CHAT_API_URL, {
+        params: { chat_id: chatId },
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    
+    return response.data;
+}
+
+// Example: Get chat history after the follow-up conversation
+console.log("\n" + "=".repeat(50));
+console.log("COMPLETE CONVERSATION HISTORY");
+console.log("=".repeat(50));
+
+const chatHistory = await getChatHistory(chatResponse.chat_id);
+
+// Display the conversation history
+chatHistory.messages?.forEach((message, index) => {
+    const role = message.role || 'unknown';
+    const content = message.content || '';
+    const timestamp = message.timestamp || '';
+    
+    console.log(`\n${index + 1}. ${role.toUpperCase()}: ${content}`);
+    if (timestamp) {
+        console.log(`   Time: ${timestamp}`);
+    }
+});
+```
+
+```php PHP
+function getChatHistory($chatId) {
+    $token = ensureValidToken();
+    
+    $url = $GLOBALS['CHAT_API_URL'] . '?' . http_build_query(['chat_id' => $chatId]);
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $token
+    ]);
+    
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        throw new Exception(curl_error($ch));
+    }
+    curl_close($ch);
+    
+    return json_decode($result, true);
+}
+
+// Example: Get chat history after the follow-up conversation
+echo "\n" . str_repeat("=", 50) . "\n";
+echo "COMPLETE CONVERSATION HISTORY\n";
+echo str_repeat("=", 50) . "\n";
+
+$chatHistory = getChatHistory($chatResponse['chat_id']);
+
+// Display the conversation history
+foreach ($chatHistory['messages'] ?? [] as $index => $message) {
+    $role = $message['role'] ?? 'unknown';
+    $content = $message['content'] ?? '';
+    $timestamp = $message['timestamp'] ?? '';
+    
+    echo "\n" . ($index + 1) . ". " . strtoupper($role) . ": " . $content . "\n";
+    if (!empty($timestamp)) {
+        echo "   Time: " . $timestamp . "\n";
+    }
+}
+```
+
+```go Go
+func getChatHistory(chatID string) (*ChatHistoryResponse, error) {
+	token, err := ensureValidToken()
+	if err != nil {
+		return nil, err
+	}
+	
+	// Build URL with query parameters
+	chatURL := fmt.Sprintf("%s?chat_id=%s", chatAPIURL, chatID)
+	
+	req, err := http.NewRequest("GET", chatURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
+	
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API call failed: %s - %s", resp.Status, string(body))
+	}
+	
+	var response ChatHistoryResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, err
+	}
+	
+	return &response, nil
+}
+
+// Example: Get chat history after the follow-up conversation
+fmt.Println("\n" + strings.Repeat("=", 50))
+fmt.Println("COMPLETE CONVERSATION HISTORY")
+fmt.Println(strings.Repeat("=", 50))
+
+chatHistory, err := getChatHistory(chatResponse.QueryID)
+if err != nil {
+	fmt.Printf("Error getting chat history: %v\n", err)
+	return
+}
+
+// Display the conversation history
+for i, message := range chatHistory.Messages {
+	role := message.Role
+	if role == "" {
+		role = "unknown"
+	}
+	content := message.Content
+	timestamp := message.Timestamp
+	
+	fmt.Printf("\n%d. %s: %s\n", i+1, strings.ToUpper(role), content)
+	if timestamp != "" {
+		fmt.Printf("   Time: %s\n", timestamp)
+	}
+}
+```
+
+```java Java
+public static ChatHistoryResponse getChatHistory(String chatId) throws IOException, InterruptedException {
+    String token = AuthManager.ensureValidToken();
+    
+    String chatUrl = CHAT_API_URL + "?chat_id=" + chatId;
+    
+    HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(chatUrl))
+            .header("Content-Type", "application/json")
+            .header("Authorization", "Bearer " + token)
+            .GET()
+            .build();
+    
+    HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+    
+    if (response.statusCode() != 200) {
+        throw new IOException("API call failed: " + response.body());
+    }
+    
+    return gson.fromJson(response.body(), ChatHistoryResponse.class);
+}
+
+// Example: Get chat history after the follow-up conversation
+public static void displayChatHistory(String chatId) throws IOException, InterruptedException {
+    System.out.println("\n" + "=".repeat(50));
+    System.out.println("COMPLETE CONVERSATION HISTORY");
+    System.out.println("=".repeat(50));
+    
+    ChatHistoryResponse chatHistory = getChatHistory(chatId);
+    
+    // Display the conversation history
+    List<ChatMessage> messages = chatHistory.messages != null ? chatHistory.messages : new ArrayList<>();
+    for (int i = 0; i < messages.size(); i++) {
+        ChatMessage message = messages.get(i);
+        String role = message.role != null ? message.role : "unknown";
+        String content = message.content != null ? message.content : "";
+        String timestamp = message.timestamp != null ? message.timestamp : "";
+        
+        System.out.printf("\n%d. %s: %s\n", (i + 1), role.toUpperCase(), content);
+        if (!timestamp.isEmpty()) {
+            System.out.printf("   Time: %s\n", timestamp);
+        }
+    }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Complete Working Examples
+
+Here are complete, runnable examples that demonstrate the full chat flow:
+
+<CodeGroup>
+
+```python Python
+#!/usr/bin/env python3
+"""
+Complete Chat Example - Python
+Demonstrates creating a chat session and continuing the conversation.
+"""
+
+import requests
+import time
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Configuration
+CLIENT_ID = os.getenv("GLOO_CLIENT_ID", "YOUR_CLIENT_ID")
+CLIENT_SECRET = os.getenv("GLOO_CLIENT_SECRET", "YOUR_CLIENT_SECRET")
+TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token"
+MESSAGE_API_URL = "https://platform.ai.gloo.com/ai/v1/message"
+CHAT_API_URL = "https://platform.ai.gloo.com/ai/v1/chat"
+
+# Global token storage
+access_token_info = {}
+
+def get_access_token():
+    """Retrieve a new access token from the Gloo AI API."""
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    data = {"grant_type": "client_credentials", "scope": "api/access"}
+    
+    response = requests.post(TOKEN_URL, headers=headers, data=data, auth=(CLIENT_ID, CLIENT_SECRET))
+    response.raise_for_status()
+    
+    token_data = response.json()
+    token_data['expires_at'] = int(time.time()) + token_data['expires_in']
+    
+    return token_data
+
+def is_token_expired(token_info):
+    """Check if the token is expired or close to expiring."""
+    if not token_info or 'expires_at' not in token_info:
+        return True
+    return time.time() > (token_info['expires_at'] - 60)
+
+def ensure_valid_token():
+    """Ensure we have a valid access token."""
+    global access_token_info
+    if is_token_expired(access_token_info):
+        print("Getting new access token...")
+        access_token_info = get_access_token()
+    return access_token_info['access_token']
+
+def send_message(message_text, chat_id=None):
+    """Send a message to the chat API."""
+    token = ensure_valid_token()
+    
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "query": message_text,
+        "character_limit": 1000,
+        "sources_limit": 5,
+        "stream": False,
+        "publishers": []
+    }
+    
+    if chat_id:
+        payload["chat_id"] = chat_id
+    
+    response = requests.post(MESSAGE_API_URL, headers=headers, json=payload)
+    response.raise_for_status()
+    
+    return response.json()
+
+def get_chat_history(chat_id):
+    """Retrieve the full chat history for a given chat ID."""
+    token = ensure_valid_token()
+    
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    
+    params = {"chat_id": chat_id}
+    
+    response = requests.get(CHAT_API_URL, headers=headers, params=params)
+    response.raise_for_status()
+    
+    return response.json()
+
+def main():
+    """Main function demonstrating the complete chat flow."""
+    try:
+        # Start with a deep, meaningful question
+        initial_question = "How can I find meaning and purpose when facing life's greatest challenges?"
+        
+        print("=== Starting New Chat Session ===")
+        print(f"Question: {initial_question}")
+        print()
+        
+        # Create new chat session
+        chat_response = send_message(initial_question)
+        chat_id = chat_response['chat_id']
+        
+        print("AI Response:")
+        print(chat_response['message'])
+        print()
+
+        # Show suggested follow-up questions
+        if chat_response['suggestions']:
+            print("Suggested follow-up questions:")
+            for i, suggestion in enumerate(chat_response['suggestions'], 1):
+                print(f"{i}. {suggestion}")
+            print()
+        
+        # Use the first suggested question for follow-up, or fallback
+        if chat_response['suggestions']:
+            follow_up_question = chat_response['suggestions'][0]
+        else:
+            follow_up_question = "Can you give me practical steps I can take today to begin this journey?"
+        
+        print("=== Continuing the Conversation ===")
+        print(f"Using suggested question: {follow_up_question}")
+        print()
+        
+        # Send follow-up message
+        follow_up_response = send_message(follow_up_question, chat_id)
+        
+        print("AI Response:")
+        print(follow_up_response.message)
+        print()
+        
+        # Display final chat history
+        print("=== Complete Chat History ===")
+        chat_history = get_chat_history(chat_id)
+        
+        for message in chat_history['messages']:
+            role = message['role'].upper()
+            content = message['message']
+            print(f"{role}: {content}")
+            print()
+        
+        print("Chat session completed successfully!")
+        
+    except requests.exceptions.RequestException as e:
+        print(f"API Error: {e}")
+    except Exception as e:
+        print(f"Error: {e}")
+
+if __name__ == "__main__":
+    main()
+```
+
+```javascript JavaScript
+#!/usr/bin/env node
+/**
+ * Complete Chat Example - JavaScript/Node.js
+ * Demonstrates creating a chat session and continuing the conversation.
+ */
+
+const axios = require('axios');
+require('dotenv').config();
+
+// Configuration
+const CLIENT_ID = process.env.GLOO_CLIENT_ID || "YOUR_CLIENT_ID";
+const CLIENT_SECRET = process.env.GLOO_CLIENT_SECRET || "YOUR_CLIENT_SECRET";
+const TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token";
+const MESSAGE_API_URL = "https://platform.ai.gloo.com/ai/v1/message";
+const CHAT_API_URL = "https://platform.ai.gloo.com/ai/v1/chat";
+
+// Global token storage
+let tokenInfo = {};
+
+async function getAccessToken() {
+    const body = 'grant_type=client_credentials&scope=api/access';
+    const response = await axios.post(TOKEN_URL, body, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        auth: { username: CLIENT_ID, password: CLIENT_SECRET }
+    });
+    
+    const tokenData = response.data;
+    tokenData.expires_at = Math.floor(Date.now() / 1000) + tokenData.expires_in;
+    
+    return tokenData;
+}
+
+function isTokenExpired(token) {
+    if (!token || !token.expires_at) return true;
+    return (Date.now() / 1000) > (token.expires_at - 60);
+}
+
+async function ensureValidToken() {
+    if (isTokenExpired(tokenInfo)) {
+        console.log("Getting new access token...");
+        tokenInfo = await getAccessToken();
+    }
+    return tokenInfo.access_token;
+}
+
+async function sendMessage(messageText, chatId = null) {
+    const token = await ensureValidToken();
+    
+    const payload = {
+        query: messageText,
+        character_limit: 1000,
+        sources_limit: 5,
+        stream: false,
+        publishers: [],
+        enable_suggestions: 1
+    };
+    
+    if (chatId) {
+        payload.chat_id = chatId;
+    }
+    
+    const response = await axios.post(MESSAGE_API_URL, payload, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    
+    return response.data;
+}
+
+async function getChatHistory(chatId) {
+    const token = await ensureValidToken();
+    
+    const response = await axios.get(CHAT_API_URL, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        params: {
+            chat_id: chatId
+        }
+    });
+    
+    return response.data;
+}
+
+async function main() {
+    try {
+        // Start with a deep, meaningful question
+        const initialQuestion = "How can I find meaning and purpose when facing life's greatest challenges?";
+        
+        console.log("=== Starting New Chat Session ===");
+        console.log(`Question: ${initialQuestion}`);
+        console.log();
+        
+        // Create new chat session
+        const chatResponse = await sendMessage(initialQuestion);
+        const chatId = chatResponse.chat_id;
+        
+        console.log("AI Response:");
+        console.log(chatResponse.message);
+        console.log();
+        
+        // Show suggested follow-up questions
+        if (chatResponse.suggestions && chatResponse.suggestions.length > 0) {
+            console.log("Suggested follow-up questions:");
+            chatResponse.suggestions.forEach((suggestion, index) => {
+                console.log(`${index + 1}. ${suggestion}`);
+            });
+            console.log();
+        }
+        
+        // Use the first suggested question for follow-up, or fallback
+        const followUpQuestion = chatResponse.suggestions && chatResponse.suggestions.length > 0 
+            ? chatResponse.suggestions[0]
+            : "Can you give me practical steps I can take today to begin this journey?";
+        
+        console.log("=== Continuing the Conversation ===");
+        console.log(`Using suggested question: ${followUpQuestion}`);
+        console.log();
+        
+        // Send follow-up message
+        const followUpResponse = await sendMessage(followUpQuestion, chatId);
+        
+        console.log("AI Response:");
+        console.log(followUpResponse.message);
+        console.log();
+        
+        // Display final chat history (optional)
+        console.log("=== Complete Chat History (Optional) ===");
+        console.log("This shows how to retrieve the complete conversation history:");
+        console.log();
+        
+        const chatHistory = await getChatHistory(chatId);
+        
+        chatHistory.messages.forEach((message, index) => {
+            const role = message.role.toUpperCase();
+            const content = message.message;
+            console.log(`${index + 1}. ${role}: ${content}`);
+            console.log();
+        });
+        
+        console.log("Chat session completed successfully!");
+        
+    } catch (error) {
+        console.error("Error:", error.response ? error.response.data : error.message);
+    }
+}
+
+// Run the main function
+main();
+```
+
+```typescript TypeScript
+#!/usr/bin/env tsx
+/**
+ * Complete Chat Example - TypeScript
+ * Demonstrates creating a chat session and continuing the conversation.
+ */
+
+import axios from 'axios';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+// Configuration
+const CLIENT_ID = process.env.GLOO_CLIENT_ID || "YOUR_CLIENT_ID";
+const CLIENT_SECRET = process.env.GLOO_CLIENT_SECRET || "YOUR_CLIENT_SECRET";
+const TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token";
+const MESSAGE_API_URL = "https://platform.ai.gloo.com/ai/v1/message";
+const CHAT_API_URL = "https://platform.ai.gloo.com/ai/v1/chat";
+
+// Type definitions
+interface TokenInfo {
+    access_token: string;
+    expires_in: number;
+    expires_at: number;
+    token_type: string;
+}
+
+interface MessageResponse {
+    chat_id: string;
+    query_id: string;
+    message_id: string;
+    message: string;
+    timestamp: string;
+    success: boolean;
+    suggestions?: string[];
+    sources?: any[];
+}
+
+interface MessageRequest {
+    query: string;
+    character_limit?: number;
+    sources_limit?: number;
+    stream?: boolean;
+    publishers?: string[];
+    chat_id?: string;
+    enable_suggestions?: number;
+}
+
+interface ChatMessage {
+    query_id: string;
+    message_id: string;
+    timestamp: string;
+    role: 'user' | 'kallm';
+    message: string;
+    character_limit?: number;
+}
+
+interface ChatHistory {
+    chat_id: string;
+    created_at: string;
+    messages: ChatMessage[];
+}
+
+// Global token storage
+let tokenInfo: TokenInfo | null = null;
+
+async function getAccessToken(): Promise<TokenInfo> {
+    const body = 'grant_type=client_credentials&scope=api/access';
+    const response = await axios.post<TokenInfo>(TOKEN_URL, body, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        auth: { username: CLIENT_ID, password: CLIENT_SECRET }
+    });
+    
+    const tokenData = response.data;
+    (tokenData as any).expires_at = Math.floor(Date.now() / 1000) + tokenData.expires_in;
+    
+    return tokenData;
+}
+
+function isTokenExpired(token: TokenInfo | null): boolean {
+    if (!token || !(token as any).expires_at) return true;
+    return (Date.now() / 1000) > ((token as any).expires_at - 60);
+}
+
+async function ensureValidToken(): Promise<string> {
+    if (isTokenExpired(tokenInfo)) {
+        console.log("Getting new access token...");
+        tokenInfo = await getAccessToken();
+    }
+    return tokenInfo!.access_token;
+}
+
+async function sendMessage(messageText: string, chatId?: string): Promise<MessageResponse> {
+    const token = await ensureValidToken();
+    
+    const payload: MessageRequest = {
+        query: messageText,
+        character_limit: 1000,
+        sources_limit: 5,
+        stream: false,
+        publishers: [],
+        enable_suggestions: 1
+    };
+    
+    if (chatId) {
+        payload.chat_id = chatId;
+    }
+    
+    const response = await axios.post<MessageResponse>(MESSAGE_API_URL, payload, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    
+    return response.data;
+}
+
+async function getChatHistory(chatId: string): Promise<ChatHistory> {
+    const token = await ensureValidToken();
+    
+    const response = await axios.get<ChatHistory>(CHAT_API_URL, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        params: {
+            chat_id: chatId
+        }
+    });
+    
+    return response.data;
+}
+
+async function main(): Promise<void> {
+    try {
+        // Start with a deep, meaningful question
+        const initialQuestion = "How can I find meaning and purpose when facing life's greatest challenges?";
+        
+        console.log("=== Starting New Chat Session ===");
+        console.log(`Question: ${initialQuestion}`);
+        console.log();
+        
+        // Create new chat session
+        const chatResponse = await sendMessage(initialQuestion);
+        const chatId = chatResponse.chat_id;
+        
+        console.log("AI Response:");
+        console.log(chatResponse.message);
+        console.log();
+        
+        // Show suggested follow-up questions
+        if (chatResponse.suggestions && chatResponse.suggestions.length > 0) {
+            console.log("Suggested follow-up questions:");
+            chatResponse.suggestions.forEach((suggestion, index) => {
+                console.log(`${index + 1}. ${suggestion}`);
+            });
+            console.log();
+        }
+        
+        // Use the first suggested question for follow-up, or fallback
+        const followUpQuestion = chatResponse.suggestions && chatResponse.suggestions.length > 0 
+            ? chatResponse.suggestions[0]
+            : "Can you give me practical steps I can take today to begin this journey?";
+        
+        console.log("=== Continuing the Conversation ===");
+        console.log(`Using suggested question: ${followUpQuestion}`);
+        console.log();
+        
+        // Send follow-up message
+        const followUpResponse = await sendMessage(followUpQuestion, chatId);
+        
+        console.log("AI Response:");
+        console.log(followUpResponse.message);
+        console.log();
+        
+        // Display final chat history
+        console.log("=== Complete Chat History ===");
+        const chatHistory = await getChatHistory(chatId);
+        
+        chatHistory.messages.forEach(message => {
+            const role = message.role.toUpperCase();
+            const content = message.message;
+            console.log(`${role}: ${content}`);
+            console.log();
+        });
+        
+        console.log("Chat session completed successfully!");
+        
+    } catch (error: any) {
+        console.error("Error:", error.response ? error.response.data : error.message);
+    }
+}
+
+// Run the main function
+main();
+```
+
+```php PHP
+#!/usr/bin/env php
+<?php
+/**
+ * Complete Chat Example - PHP
+ * Demonstrates creating a chat session and continuing the conversation.
+ */
+
+require_once 'vendor/autoload.php';
+
+// Load environment variables
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+// Configuration
+$CLIENT_ID = getenv('GLOO_CLIENT_ID') ?: 'YOUR_CLIENT_ID';
+$CLIENT_SECRET = getenv('GLOO_CLIENT_SECRET') ?: 'YOUR_CLIENT_SECRET';
+$TOKEN_URL = 'https://platform.ai.gloo.com/oauth2/token';
+$MESSAGE_API_URL = 'https://platform.ai.gloo.com/ai/v1/message';
+$CHAT_API_URL = 'https://platform.ai.gloo.com/ai/v1/chat';
+
+// Global token storage
+$token_info = [];
+
+function getAccessToken($client_id, $client_secret, $token_url) {
+    $post_data = 'grant_type=client_credentials&scope=api/access';
+    $ch = curl_init();
+    
+    curl_setopt($ch, CURLOPT_URL, $token_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+    curl_setopt($ch, CURLOPT_USERPWD, $client_id . ':' . $client_secret);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+    
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        throw new Exception(curl_error($ch));
+    }
+    curl_close($ch);
+    
+    $token_data = json_decode($result, true);
+    $token_data['expires_at'] = time() + $token_data['expires_in'];
+    
+    return $token_data;
+}
+
+function isTokenExpired($token) {
+    if (empty($token) || !isset($token['expires_at'])) {
+        return true;
+    }
+    return time() > ($token['expires_at'] - 60);
+}
+
+function ensureValidToken() {
+    global $token_info, $CLIENT_ID, $CLIENT_SECRET, $TOKEN_URL;
+    
+    if (isTokenExpired($tokenInfo)) {
+        echo "Getting new access token...\n";
+        $token_info = getAccessToken($CLIENT_ID, $CLIENT_SECRET, $TOKEN_URL);
+    }
+    
+    return $token_info['access_token'];
+}
+
+function sendMessage($messageText, $chatId = null) {
+    global $MESSAGE_API_URL;
+    $token = ensureValidToken();
+    
+    $payload = [
+        'query' => $messageText,
+        'character_limit' => 1000,
+        'sources_limit' => 5,
+        'stream' => false,
+        'publishers' => []
+    ];
+    
+    if ($chatId) {
+        $payload['chat_id'] = $chatId;
+    }
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $MESSAGE_API_URL);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $token
+    ]);
+    
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        throw new Exception(curl_error($ch));
+    }
+    curl_close($ch);
+    
+    return json_decode($result, true);
+}
+
+function getChatHistory($chatId) {
+    global $CHAT_API_URL;
+    $token = ensureValidToken();
+    
+    $url = $CHAT_API_URL . '?' . http_build_query(['chat_id' => $chatId]);
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $token,
+        'Content-Type: application/json'
+    ]);
+    
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        throw new Exception(curl_error($ch));
+    }
+    curl_close($ch);
+    
+    return json_decode($result, true);
+}
+
+function main() {
+    try {
+        // Start with a deep, meaningful question about human flourishing
+        $initial_question = "How can I find meaning and purpose when facing life's greatest challenges?";
+        
+        echo "=== Starting New Chat Session ===\n";
+        echo "Question: $initial_question\n\n";
+        
+        // Create new chat session
+        $chat_response = sendMessage($initial_question);
+        $chat_id = $chat_response->chat_id;
+        
+        echo "AI Response:\n";
+        echo $chat_response->message . "\n\n";
+        
+        // Show suggested follow-up questions
+        if (!empty($chat_response->suggestions)) {
+            echo "Suggested follow-up questions:\n";
+            foreach ($chat_response->suggestions as $index => $suggestion) {
+                echo ($index + 1) . ". " . $suggestion . "\n";
+            }
+            echo "\n";
+        }
+        
+        // Use the first suggested question for follow-up, or a predefined fallback
+        $follow_up_question = !empty($chat_response->suggestions)
+        ? $chat_response->suggestions[0]
+        : "Can you give me practical steps I can take today to begin this journey?";
+
+        echo "=== Continuing the Conversation ===\n";
+        echo "Using suggested question: $follow_up_question\n\n";
+
+        // Send the follow-up message
+        $follow_up_response = sendMessage($follow_up_question, $chat_id);
+        echo "AI Response:\n";
+        echo $follow_up_response->message . "\n\n";
+
+        // Display final chat history
+        echo "=== Complete Chat History ===\n";
+        $chat_history = getChatHistory($chat_id);
+        
+        foreach ($chat_history->messages as $i => $message) {
+            displayMessage($message, $i);
+        }
+        
+        echo "Chat session completed successfully!\n";
+        
+    } catch (Exception $e) {
+        echo "Error: " . $e->getMessage() . "\n";
+    }
+}
+
+// Run the main function
+main();
+?>
+```
+
+```go Go
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"os"
+	"strings"
+	"time"
+)
+
+// Configuration
+var (
+	clientID     = getEnv("GLOO_CLIENT_ID", "YOUR_CLIENT_ID")
+	clientSecret = getEnv("GLOO_CLIENT_SECRET", "YOUR_CLIENT_SECRET")
+	tokenURL     = "https://platform.ai.gloo.com/oauth2/token"
+	messageURL   = "https://platform.ai.gloo.com/ai/v1/message"
+	chatURL      = "https://platform.ai.gloo.com/ai/v1/chat"
+)
+
+// Data structures
+type TokenInfo struct {
+	AccessToken string `json:"access_token"`
+	ExpiresIn   int    `json:"expires_in"`
+	ExpiresAt   int64  `json:"expires_at"`
+	TokenType   string `json:"token_type"`
+}
+
+type MessageRequest struct {
+	Query          string   `json:"query"`
+	CharacterLimit int      `json:"character_limit,omitempty"`
+	SourcesLimit   int      `json:"sources_limit,omitempty"`
+	Stream         bool     `json:"stream,omitempty"`
+	Publishers     []string `json:"publishers,omitempty"`
+	ChatID         string   `json:"chat_id,omitempty"`
+}
+
+type MessageResponse struct {
+	QueryID   string `json:"query_id"`
+	MessageID string `json:"message_id"`
+	Message   string `json:"message"`
+	Timestamp string `json:"timestamp"`
+}
+
+type ChatMessage struct {
+	QueryID        string `json:"query_id"`
+	MessageID      string `json:"message_id"`
+	Timestamp      string `json:"timestamp"`
+	Role           string `json:"role"`
+	Message        string `json:"message"`
+	CharacterLimit int    `json:"character_limit,omitempty"`
+}
+
+type ChatHistory struct {
+	ChatID    string        `json:"chat_id"`
+	CreatedAt string        `json:"created_at"`
+	Messages  []ChatMessage `json:"messages"`
+}
+
+// Global token storage
+var tokenInfo *TokenInfo
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}
+
+func getAccessToken() (*TokenInfo, error) {
+	data := strings.NewReader("grant_type=client_credentials&scope=api/access")
+	req, err := http.NewRequest("POST", tokenURL, data)
+	if err != nil {
+		return nil, err
+	}
+
+	req.SetBasicAuth(clientID, clientSecret)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to get token: %s - %s", resp.Status, string(bodyBytes))
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var token TokenInfo
+	if err := json.Unmarshal(body, &token); err != nil {
+		return nil, err
+	}
+
+	token.ExpiresAt = time.Now().Unix() + int64(token.ExpiresIn)
+	return &token, nil
+}
+
+func isTokenExpired(token *TokenInfo) bool {
+	if token == nil || token.ExpiresAt == 0 {
+		return true
+	}
+	return time.Now().Unix() > (token.ExpiresAt - 60)
+}
+
+func ensureValidToken() (string, error) {
+	if isTokenExpired(tokenInfo) {
+		fmt.Println("Getting new access token...")
+		var err error
+		tokenInfo, err = getAccessToken()
+		if err != nil {
+			return "", err
+		}
+	}
+	return tokenInfo.AccessToken, nil
+}
+
+func sendMessage(messageText string, chatID string) (*MessageResponse, error) {
+	token, err := ensureValidToken()
+	if err != nil {
+		return nil, err
+	}
+
+	payload := MessageRequest{
+		Query:          messageText,
+		CharacterLimit: 1000,
+		SourcesLimit:   5,
+		Stream:         false,
+		Publishers:     []string{},
+		ChatID:         chatID,
+	}
+
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", messageURL, bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API call failed: %s - %s", resp.Status, string(body))
+	}
+
+	var response MessageResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, err
+	}
+
+	return &response, nil
+}
+
+func getChatHistory(chatID string) (*ChatHistory, error) {
+	token, err := ensureValidToken()
+	if err != nil {
+		return nil, err
+	}
+
+	params := url.Values{}
+	params.Add("chat_id", chatID)
+	requestURL := fmt.Sprintf("%s?%s", chatURL, params.Encode())
+
+	req, err := http.NewRequest("GET", requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API call failed: %s - %s", resp.Status, string(body))
+	}
+
+	var history ChatHistory
+	if err := json.Unmarshal(body, &history); err != nil {
+		return nil, err
+	}
+
+	return &history, nil
+}
+
+func main() {
+	// Start with a deep, meaningful question
+	initialQuestion := "How can I find meaning and purpose when facing life's greatest challenges?"
+
+	fmt.Println("=== Starting New Chat Session ===")
+	fmt.Printf("Question: %s\n\n", initialQuestion)
+
+	// Create new chat session
+	chatResponse, err := sendMessage(initialQuestion, "")
+	if err != nil {
+		fmt.Printf("Error creating chat: %v\n", err)
+		return
+	}
+
+	chatID := chatResponse.ChatID
+
+	fmt.Println("AI Response:")
+	fmt.Printf("%s\n\n", chatResponse.Message)
+
+	// Continue with follow-up questions
+	followUpQuestions := []string{
+		"Can you give me practical steps I can take today to begin this journey?",
+		"How do I maintain hope when circumstances seem overwhelming?",
+		"What role does community play in finding purpose?",
+	}
+
+	for i, question := range followUpQuestions {
+		fmt.Printf("=== Follow-up Question %d ===\n", i+1)
+		fmt.Printf("Question: %s\n\n", question)
+
+		// Send follow-up message
+		followUpResponse, err := sendMessage(question, chatID)
+		if err != nil {
+			fmt.Printf("Error sending follow-up: %v\n", err)
+			continue
+		}
+
+		fmt.Println("AI Response:")
+		fmt.Printf("%s\n\n", followUpResponse.Message)
+	}
+
+	// Display final chat history
+	fmt.Println("=== Complete Chat History ===")
+	chatHistory, err := getChatHistory(chatID)
+	if err != nil {
+		fmt.Printf("Error getting chat history: %v\n", err)
+		return
+	}
+
+	for _, message := range chatHistory.Messages {
+		role := strings.ToUpper(message.Role)
+		content := message.Message
+		fmt.Printf("%s: %s\n\n", role, content)
+	}
+
+	fmt.Println("Chat session completed successfully!")
+}
+```
+
+```java Java
+import com.google.gson.Gson;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
+
+/**
+ * Complete Chat Example - Java
+ * Demonstrates creating a chat session and continuing the conversation.
+ */
+public class ChatExample {
+    // Configuration
+    private static final String CLIENT_ID = System.getenv().getOrDefault("GLOO_CLIENT_ID", "YOUR_CLIENT_ID");
+    private static final String CLIENT_SECRET = System.getenv().getOrDefault("GLOO_CLIENT_SECRET", "YOUR_CLIENT_SECRET");
+    private static final String TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token";
+    private static final String MESSAGE_API_URL = "https://platform.ai.gloo.com/ai/v1/message";
+    private static final String CHAT_API_URL = "https://platform.ai.gloo.com/ai/v1/chat";
+    
+    // HTTP client and JSON parser
+    private static final HttpClient httpClient = HttpClient.newHttpClient();
+    private static final Gson gson = new Gson();
+    
+    // Global token storage
+    private static TokenInfo tokenInfo;
+    
+    // Data classes
+    public static class TokenInfo {
+        public String access_token;
+        public int expires_in;
+        public long expires_at;
+        public String token_type;
+    }
+    
+    public static class MessageRequest {
+        public String query;
+        public Integer character_limit;
+        public Integer sources_limit;
+        public Boolean stream;
+        public List<String> publishers;
+        public String chat_id;
+    }
+    
+    public static class MessageResponse {
+        public String chat_id;
+        public String query_id;
+        public String message_id;
+        public String message;
+        public String timestamp;
+        public Boolean success;
+        public List<String> suggestions;
+        public List<Object> sources;
+    }
+    
+    public static class ChatMessage {
+        public String query_id;
+        public String message_id;
+        public String timestamp;
+        public String role;
+        public String message;
+        public Integer character_limit;
+    }
+    
+    public static class ChatHistory {
+        public String chat_id;
+        public String created_at;
+        public List<ChatMessage> messages;
+    }
+    
+    // Authentication methods
+    private static TokenInfo getAccessToken() throws IOException, InterruptedException {
+        String auth = CLIENT_ID + ":" + CLIENT_SECRET;
+        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+        String requestBody = "grant_type=client_credentials&scope=api/access";
+        
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(TOKEN_URL))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .header("Authorization", "Basic " + encodedAuth)
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+        
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        
+        if (response.statusCode() != 200) {
+            throw new IOException("Failed to get access token: " + response.body());
+        }
+        
+        TokenInfo token = gson.fromJson(response.body(), TokenInfo.class);
+        token.expires_at = Instant.now().getEpochSecond() + token.expires_in;
+        
+        return token;
+    }
+    
+    private static boolean isTokenExpired(TokenInfo token) {
+        if (token == null || token.expires_at == 0) {
+            return true;
+        }
+        return Instant.now().getEpochSecond() > (token.expires_at - 60);
+    }
+    
+    private static String ensureValidToken() throws IOException, InterruptedException {
+        if (isTokenExpired(tokenInfo)) {
+            System.out.println("Getting new access token...");
+            tokenInfo = getAccessToken();
+        }
+        return tokenInfo.access_token;
+    }
+    
+    // Chat methods
+    private static MessageResponse sendMessage(String messageText, String chatId) throws IOException, InterruptedException {
+        String token = ensureValidToken();
+        
+        MessageRequest payload = new MessageRequest();
+        payload.query = messageText;
+        payload.character_limit = 1000;
+        payload.sources_limit = 5;
+        payload.stream = false;
+        payload.publishers = List.of();
+        payload.chat_id = chatId;
+        
+        String jsonPayload = gson.toJson(payload);
+        
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(MESSAGE_API_URL))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .build();
+        
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        
+        if (response.statusCode() != 200) {
+            throw new IOException("API call failed: " + response.body());
+        }
+        
+        return gson.fromJson(response.body(), MessageResponse.class);
+    }
+    
+    private static ChatHistory getChatHistory(String chatId) throws IOException, InterruptedException {
+        String token = ensureValidToken();
+        
+        String url = CHAT_API_URL + "?chat_id=" + chatId;
+        
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + token)
+                .header("Content-Type", "application/json")
+                .GET()
+                .build();
+        
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        
+        if (response.statusCode() != 200) {
+            throw new IOException("API call failed: " + response.body());
+        }
+        
+        return gson.fromJson(response.body(), ChatHistory.class);
+    }
+    
+    // Main method
+    public static void main(String[] args) {
+        try {
+            // Start with a deep, meaningful question
+            String initialQuestion = "How can I find meaning and purpose when facing life's greatest challenges?";
+            
+            System.out.println("=== Starting New Chat Session ===");
+            System.out.println("Question: " + initialQuestion);
+            System.out.println();
+            
+            // Create new chat session
+            MessageResponse chatResponse = sendMessage(initialQuestion, null);
+            String chatId = chatResponse.chat_id;
+            
+            System.out.println("AI Response:");
+            System.out.println(chatResponse.message);
+            System.out.println();
+
+            // Show suggested follow-up questions
+            List<String> suggestions = chatResponse.getSuggestions();
+            if (suggestions != null && !suggestions.isEmpty()) {
+                System.out.println("Suggested follow-up questions:");
+                for (int i = 0; i < suggestions.size(); i++) {
+                    System.out.println((i + 1) + ". " + suggestions.get(i));
+                }
+                System.out.println();
+            }
+        
+            // Use the first suggested question for follow-up, or fallback
+            String followUpQuestion = (suggestions != null && !suggestions.isEmpty()) 
+                ? suggestions.get(0) 
+                : "Can you give me practical steps I can take today to begin this journey?";
+        
+            System.out.println("=== Continuing the Conversation ===");
+            System.out.println("Using suggested question: " + followUpQuestion);
+            System.out.println();
+        
+            // Send follow-up message
+            MessageResponse followUpResponse = sendMessage(followUpQuestion, chatId);
+        
+            System.out.println("AI Response:");
+            System.out.println(followUpResponse.getMessage());
+            System.out.println();
+            
+            // Display final chat history
+            System.out.println("=== Complete Chat History ===");
+            ChatHistory chatHistory = getChatHistory(chatId);
+            
+            for (ChatMessage message : chatHistory.messages) {
+                String role = message.role.toUpperCase();
+                String content = message.message;
+                System.out.println(role + ": " + content);
+                System.out.println();
+            }
+            
+            System.out.println("Chat session completed successfully!");
+            
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Error Handling Best Practices
+
+When working with the Message API, implement proper error handling for common scenarios:
+
+### Authentication Errors
+- **401 Unauthorized**: Token expired or invalid
+- **403 Forbidden**: Insufficient permissions
+
+### Request Errors
+- **400 Bad Request**: Invalid request parameters
+- **422 Unprocessable Entity**: Validation errors
+
+### Rate Limiting
+- **429 Too Many Requests**: Implement backoff strategies
+
+### Network Issues
+- **Connection timeouts**: Implement retry logic
+- **Network failures**: Handle gracefully with user feedback
+
+---
+
+## Advanced Features
+
+### Streaming Responses
+Set `stream: true` in your request for real-time response streaming:
+
+```json
+{
+  "query": "Tell me about hope in difficult times",
+  "stream": true,
+  "chat_id": "your-chat-id"
+}
+```
+
+### Publisher Filtering
+Restrict responses to specific content publishers:
+
+```json
+{
+  "query": "What does Scripture say about finding purpose?",
+  "publishers": ["Bible", "Christian Literature"],
+  "chat_id": "your-chat-id"
+}
+```
+
+### Response Customization
+Control response length and source count:
+
+```json
+{
+  "query": "How can I grow spiritually?",
+  "character_limit": 500,
+  "sources_limit": 3,
+  "chat_id": "your-chat-id"
+}
+```
+
+---
+
+## Next Steps
+
+Now that you understand the Message API, consider exploring:
+
+1. **[Completions API](/tutorials/completions)** - For stateless interactions
+2. **[Data Search API](/api-guides/search)** - For content discovery
+3. **[Tool Use](/api-guides/tool-use)** - For enhanced AI capabilities
+4. **[Assistants](/product-guides/assistants)** - For specialized AI helpers
+
+The Message API provides a powerful foundation for building meaningful, contextual conversations that can help users explore deep questions about life, purpose, and human flourishing.

@@ -41,9 +41,12 @@
                 "example": [
                   {
                     "chat_id": "c108e5708-3a35-4104-8ac0-abd0fc18c008",
-                    "created_at": "2025-02-05T00:15:45.331447",
+                    "user_id": "u8721bb6d-b1c3-4130-b413-e7a56b3403d9",
+                    "created_at": "2025-07-14T18:38:26.126361",
+                    "updated_at": "2025-07-14T18:38:26.126361",
                     "title": "Chat Title",
                     "summary": "Chat Summary",
+                    "task": null,
                     "pin": false
                   }
                 ]
@@ -100,25 +103,44 @@
                   "title": "Response Get"
                 },
                 "example": {
-                  "chat_id": "c108e5708-3a35-4104-8ac0-abd0fc18c008",
-                  "created_at": "2025-02-05T00:15:45.331447",
+                  "user_id": "u8721bb6d-b1c3-4130-b413-e7a56b3403d9",
+                  "chat_id": "c518c540a-28f1-4055-a8ed-44a5929c63f8",
+                  "created_at": "2025-07-14T19:04:56.974882",
+                  "updated_at": "2025-07-14T19:05:03.205307",
                   "messages": [
-                    {
-                      "query_id": "q7f2d484a-acd8-48ca-9864-1aa6191a6ec0",
-                      "message_id": "m19e942a2-545b-41a1-9f1e-b96cd4f10d11",
-                      "timestamp": "2025-02-05T00:16:18.268667",
-                      "role": "user",
-                      "character_limit": 100,
-                      "message": "What is your name?"
-                    },
-                    {
-                      "query_id": "q7f2d484a-acd8-48ca-9864-1aa6191a6ec0",
-                      "message_id": "m62a91f80-f9f5-40ed-bd59-d7ce04b06de5",
-                      "timestamp": "2025-02-05T00:16:19.856265",
-                      "role": "kallm",
-                      "message": "My name is Gloo AI Chat, and I'm here to assist you!"
-                    }
-                  ]
+                      {
+                          "query_id": "q912f58e9-135b-4f95-8853-d98f7b5294f6",
+                          "message_id": "mfdca4b99-c672-4f76-8b48-dcf550be9500",
+                          "timestamp": "2025-07-14T19:04:58.449394",
+                          "role": "user",
+                          "character_limit": 0,
+                          "stream": false,
+                          "intent": 0,
+                          "message": "What is your name?",
+                          "model": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+                          "publishers": []
+                      },
+                      {
+                          "query_id": "q912f58e9-135b-4f95-8853-d98f7b5294f6",
+                          "message_id": "mfc7bc417-c089-4806-8b61-51ba24b09898",
+                          "timestamp": "2025-07-14T19:04:59.679262",
+                          "role": "kallm",
+                          "intent": 0,
+                          "sources_limit": 0,
+                          "sources": [],
+                          "success": true,
+                          "suggestions": [
+                              "How can I use AI?",
+                              "What can KALLM help me with?",
+                              "Can I ask you for advice?"
+                          ],
+                          "message": "My name is Gloo AI Chat. How can I assist you today?",
+                          "model": "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+                      }
+                  ],
+                  "pin": false,
+                  "summary": null,
+                  "title": "User Asks About AI's Name"
                 }
               }
             }
@@ -160,7 +182,8 @@
                 "schema": {},
                 "example": {
                   "chat_id": "c2e49a430-1d00-4f07-bd83-123c5b51c3b5",
-                  "created_at": "2025-02-05T00:12:52.322010"
+                  "created_at": "2025-02-05T00:12:52.322010",
+                  "user_id": "u8721bb6d-b1c3-4130-b413-e7a56b3403d9"
                 }
               }
             }
@@ -304,7 +327,24 @@
             }
           },
           "422": {
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": [
+                      {
+                          "type": "missing",
+                          "loc": [
+                              "query",
+                              "chat_id"
+                          ],
+                          "msg": "Field required",
+                          "input": null
+                      }
+                  ]
+                }
+              }
+            }
           }
         }
       }
@@ -411,10 +451,21 @@
                   "title": "Response Post-Message"
                 },
                 "example": {
-                  "query_id": "q3c870f25-63fc-451f-a9ce-9a5abed55aa0",
-                  "message_id": "mbc51c1d8-29e7-416f-85fc-9f4209d9887b",
-                  "message": "My name is Gloo AI Chat, and I'm here to assist you!",
-                  "timestamp": "2025-02-04T23:55:03.573767"
+                  "chat_id": "cb26ddd31-8cd8-4fb0-a258-6691aa43771c",
+                  "query_id": "q167f294a-703f-4043-9d55-e929e35b2cf3",
+                  "message_id": "m126384c0-def0-43ac-9d4e-c099ebf4c309",
+                  "timestamp": "2025-07-14T18:29:42.060759",
+                  "success": true,
+                  "message": "My name is Gloo AI Chat.",
+                  "model": "us.meta.llama3-3-70b-instruct-v1:0",
+                  "sources": [],
+                  "sources_limit": 0,
+                  "suggestions": [
+                      "How can I use AI?",
+                      "What can KALLM help me with?",
+                      "Can I ask you for advice?"
+                  ],
+                  "intent": 0
                 }
               }
             }
@@ -800,22 +851,35 @@
                   "title": "Response Post-Completions"
                 },
                 "example": {
-                  "id": "",
-                  "object": "chat.completion",
-                  "created": 1745341096,
-                  "model": "meta-llama/Llama-3.3-70B-Instruct",
+                  "id": "chatcmpl-9b15f600",
                   "choices": [
-                    {
-                      "index": 0,
-                      "message": {
-                        "role": "assistant",
-                        "content": "Here to provide respectful, polite, and compassionate responses to your questions and concerns, while upholding the importance of human life, dignity, and flourishing.",
-                        "annotations": []
-                      },
-                      "finish_reason": "done"
-                    }
+                      {
+                          "finish_reason": "stop",
+                          "index": 0,
+                          "logprobs": null,
+                          "message": {
+                              "content": "Hello. It's nice to meet you. Is there something I can help you with or would you like to chat?",
+                              "refusal": null,
+                              "role": "assistant",
+                              "annotations": null,
+                              "audio": null,
+                              "function_call": null,
+                              "tool_calls": null
+                          }
+                      }
                   ],
-                  "service_tier": "default"
+                  "created": 1752519103,
+                  "model": "us.meta.llama3-3-70b-instruct-v1:0",
+                  "object": "chat.completion",
+                  "service_tier": null,
+                  "system_fingerprint": "fp",
+                  "usage": {
+                      "completion_tokens": 25,
+                      "prompt_tokens": 1696,
+                      "total_tokens": 1721,
+                      "completion_tokens_details": null,
+                      "prompt_tokens_details": null
+                  }
                 }
               }
             }
@@ -2136,7 +2200,7 @@
             "type": "string",
             "title": "Model",
             "description": "Model to use for generating responses",
-            "default": "meta-llama/Llama-3.3-70B-Instruct"
+            "default": "us.meta.llama3-3-70b-instruct-v1:0"
           },
           "messages": {
             "items": {
