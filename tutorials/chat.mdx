@@ -167,17 +167,17 @@ $CLIENT_SECRET = getenv('GLOO_CLIENT_SECRET') ?: 'YOUR_CLIENT_SECRET';
 $TOKEN_URL = 'https://platform.ai.gloo.com/oauth2/token';
 
 // Global token storage
-$tokenInfo = [];
+$token_info = [];
 
-function getAccessToken($clientId, $clientSecret, $tokenUrl) {
-    $postData = 'grant_type=client_credentials&scope=api/access';
+function getAccessToken($client_id, $client_secret, $token_url) {
+    $post_data = 'grant_type=client_credentials&scope=api/access';
     $ch = curl_init();
     
-    curl_setopt($ch, CURLOPT_URL, $tokenUrl);
+    curl_setopt($ch, CURLOPT_URL, $token_url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-    curl_setopt($ch, CURLOPT_USERPWD, $clientId . ':' . $clientSecret);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+    curl_setopt($ch, CURLOPT_USERPWD, $client_id . ':' . $client_secret);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
     
     $result = curl_exec($ch);
@@ -186,10 +186,10 @@ function getAccessToken($clientId, $clientSecret, $tokenUrl) {
     }
     curl_close($ch);
     
-    $tokenData = json_decode($result, true);
-    $tokenData['expires_at'] = time() + $tokenData['expires_in'];
+    $token_data = json_decode($result, true);
+    $token_data['expires_at'] = time() + $token_data['expires_in'];
     
-    return $tokenData;
+    return $token_data;
 }
 
 function isTokenExpired($token) {
@@ -200,14 +200,14 @@ function isTokenExpired($token) {
 }
 
 function ensureValidToken() {
-    global $tokenInfo, $CLIENT_ID, $CLIENT_SECRET, $TOKEN_URL;
+    global $token_info, $CLIENT_ID, $CLIENT_SECRET, $TOKEN_URL;
     
-    if (isTokenExpired($tokenInfo)) {
+    if (isTokenExpired($token_info)) {
         echo "Getting new access token...\n";
-        $tokenInfo = getAccessToken($CLIENT_ID, $CLIENT_SECRET, $TOKEN_URL);
+        $token_info = getAccessToken($CLIENT_ID, $CLIENT_SECRET, $TOKEN_URL);
     }
     
-    return $tokenInfo['access_token'];
+    return $token_info['access_token'];
 }
 ?>
 ```
@@ -533,11 +533,11 @@ if (chatResponse.suggestions) {
 ```php PHP
 $MESSAGE_API_URL = 'https://platform.ai.gloo.com/ai/v1/message';
 
-function createChatSession($initialMessage) {
+function createChatSession($initial_message) {
     $token = ensureValidToken();
     
     $payload = json_encode([
-        'query' => $initialMessage,
+        'query' => $initial_message,
         'character_limit' => 1000,
         'sources_limit' => 5,
         'stream' => false,
@@ -565,18 +565,18 @@ function createChatSession($initialMessage) {
 }
 
 // Example usage
-$initialQuestion = "How can I find meaning and purpose when facing life's greatest challenges?";
-$chatResponse = createChatSession($initialQuestion);
+$initial_question = "How can I find meaning and purpose when facing life's greatest challenges?";
+$chat_response = createChatSession($initial_question);
 
 echo "Chat created successfully!\n";
-echo "Chat ID: " . $chatResponse['chat_id'] . "\n";
-echo "Message ID: " . $chatResponse['message_id'] . "\n";
-echo "Response: " . $chatResponse['message'] . "\n";
+echo "Chat ID: " . $chat_response['chat_id'] . "\n";
+echo "Message ID: " . $chat_response['message_id'] . "\n";
+echo "Response: " . $chat_response['message'] . "\n";
 
 // Show suggested follow-up questions
-if (!empty($chatResponse['suggestions'])) {
+if (!empty($chat_response['suggestions'])) {
     echo "\nSuggested follow-up questions:\n";
-    foreach ($chatResponse['suggestions'] as $index => $suggestion) {
+    foreach ($chat_response['suggestions'] as $index => $suggestion) {
         echo ($index + 1) . ". " . $suggestion . "\n";
     }
 }
@@ -886,12 +886,12 @@ console.log(`Response: ${followUpResponse.message}`);
 ```
 
 ```php PHP
-function continueConversation($chatId, $followUpMessage) {
+function continueConversation($chat_id, $follow_up) {
     $token = ensureValidToken();
     
     $payload = json_encode([
-        'chat_id' => $chatId,
-        'query' => $followUpMessage,
+        'chat_id' => $chat_id,
+        'query' => $follow_up,
         'character_limit' => 1000,
         'sources_limit' => 5,
         'stream' => false,
@@ -918,13 +918,13 @@ function continueConversation($chatId, $followUpMessage) {
 }
 
 // Example: Continue the conversation with a follow-up
-$followUp = !empty($chatResponse['suggestions'])
-    ? $chatResponse['suggestions'][0]
+$follow_up = !empty($chat_response['suggestions'])
+    ? $chat_response['suggestions'][0]
     : "Can you give me practical steps I can take today to begin this journey?";
-$followUpResponse = continueConversation($chatResponse['chat_id'], $followUp);
+$follow_up_response = continueConversation($chat_response['chat_id'], $follow_up);
 
 echo "\nFollow-up Response:\n";
-echo "Response: " . $followUpResponse['message'] . "\n";
+echo "Response: " . $follow_up_response['message'] . "\n";
 ```
 
 ```go Go
@@ -1161,10 +1161,10 @@ chatHistory.messages?.forEach((message, index) => {
 ```
 
 ```php PHP
-function getChatHistory($chatId) {
+function getChatHistory($chat_id) {
     $token = ensureValidToken();
     
-    $url = $GLOBALS['CHAT_API_URL'] . '?' . http_build_query(['chat_id' => $chatId]);
+    $url = $GLOBALS['CHAT_API_URL'] . '?' . http_build_query(['chat_id' => $chat_id]);
     
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -1188,10 +1188,10 @@ echo "\n" . str_repeat("=", 50) . "\n";
 echo "COMPLETE CONVERSATION HISTORY\n";
 echo str_repeat("=", 50) . "\n";
 
-$chatHistory = getChatHistory($chatResponse['chat_id']);
+$chat_history = getChatHistory($chat_response['chat_id']);
 
 // Display the conversation history
-foreach ($chatHistory['messages'] ?? [] as $index => $message) {
+foreach ($chat_history['messages'] ?? [] as $index => $message) {
     $role = $message['role'] ?? 'unknown';
     $content = $message['content'] ?? '';
     $timestamp = $message['timestamp'] ?? '';
