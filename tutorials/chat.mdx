@@ -1,5 +1,5 @@
 ---
-title: 'Interactive Chat'
+title: 'Building Interactive Chat'
 description: 'Learn how to create meaningful conversations using Gloo AI.'
 ---
 
@@ -39,7 +39,7 @@ CLIENT_ID = os.getenv("GLOO_CLIENT_ID", "YOUR_CLIENT_ID")
 CLIENT_SECRET = os.getenv("GLOO_CLIENT_SECRET", "YOUR_CLIENT_SECRET")
 TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token"
 
-# Global token storage
+#- Global token storage
 access_token_info = {}
 
 def get_access_token():
@@ -392,14 +392,14 @@ def create_chat_session(initial_message):
         "Content-Type": "application/json"
     }
     
-    # Request body for new chat (no chat_id provided)
+    #- Request body for new chat (no chat_id provided)
     payload = {
         "query": initial_message,
         "character_limit": 1000,
         "sources_limit": 5,
         "stream": False,
         "publishers": [],
-        "enable_suggestions": 1  # Enable suggested follow-up questions
+        "enable_suggestions": 1  #- Enable suggested follow-up questions
     }
     
     response = requests.post(MESSAGE_API_URL, headers=headers, json=payload)
@@ -407,7 +407,7 @@ def create_chat_session(initial_message):
     
     return response.json()
 
-# Example usage
+#- Example usage
 initial_question = "How can I find meaning and purpose when facing life's greatest challenges?"
 chat_response = create_chat_session(initial_question)
 
@@ -416,7 +416,7 @@ print(f"Chat ID: {chat_response['chat_id']}")
 print(f"Message ID: {chat_response['message_id']}")
 print(f"Response: {chat_response['message']}")
 
-# Show suggested follow-up questions
+#- Show suggested follow-up questions
 if chat_response.get('suggestions'):
     print("\nSuggested follow-up questions:")
     for i, suggestion in enumerate(chat_response['suggestions'], 1):
@@ -787,7 +787,7 @@ def continue_conversation(chat_id, follow_up_message):
         "Content-Type": "application/json"
     }
     
-    # Include chat_id to continue the conversation
+    #- Include chat_id to continue the conversation
     payload = {
         "chat_id": chat_id,
         "query": follow_up_message,
@@ -795,7 +795,7 @@ def continue_conversation(chat_id, follow_up_message):
         "sources_limit": 5,
         "stream": False,
         "publishers": [],
-        "enable_suggestions": 1  # Continue getting suggestions
+        "enable_suggestions": 1  #- Continue getting suggestions
     }
     
     response = requests.post(MESSAGE_API_URL, headers=headers, json=payload)
@@ -803,10 +803,10 @@ def continue_conversation(chat_id, follow_up_message):
     
     return response.json()
 
-# Example: Continue the conversation using a suggested response
-# Use the first suggestion from the initial response
+#- Example: Continue the conversation using a suggested response
+#- Use the first suggestion from the initial response
 if chat_response.get('suggestions') and len(chat_response['suggestions']) > 0:
-    follow_up = chat_response['suggestions'][0]  # Use first suggested question
+    follow_up = chat_response['suggestions'][0]  #- Use first suggested question
 else:
     follow_up = "Can you give me practical steps I can take today to begin this journey?"
 
@@ -1064,7 +1064,7 @@ def get_chat_history(chat_id):
         "Content-Type": "application/json"
     }
     
-    # Use the chat endpoint to get full conversation history
+    #- Use the chat endpoint to get full conversation history
     params = {"chat_id": chat_id}
     
     response = requests.get(CHAT_API_URL, headers=headers, params=params)
@@ -1072,14 +1072,14 @@ def get_chat_history(chat_id):
     
     return response.json()
 
-# Example: Get chat history after the follow-up conversation
+#- Example: Get chat history after the follow-up conversation
 print("\n" + "="*50)
 print("COMPLETE CONVERSATION HISTORY")
 print("="*50)
 
 chat_history = get_chat_history(chat_response['chat_id'])
 
-# Display the conversation history
+#- Display the conversation history
 for i, message in enumerate(chat_history.get('messages', []), 1):
     role = message.get('role', 'unknown')
     content = message.get('content', '')
@@ -1340,17 +1340,17 @@ import time
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
+#- Load environment variables
 load_dotenv()
 
-# Configuration
+#- Configuration
 CLIENT_ID = os.getenv("GLOO_CLIENT_ID", "YOUR_CLIENT_ID")
 CLIENT_SECRET = os.getenv("GLOO_CLIENT_SECRET", "YOUR_CLIENT_SECRET")
 TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token"
 MESSAGE_API_URL = "https://platform.ai.gloo.com/ai/v1/message"
 CHAT_API_URL = "https://platform.ai.gloo.com/ai/v1/chat"
 
-# Global token storage
+#- Global token storage
 access_token_info = {}
 
 def get_access_token():
@@ -1424,14 +1424,14 @@ def get_chat_history(chat_id):
 def main():
     """Main function demonstrating the complete chat flow."""
     try:
-        # Start with a deep, meaningful question
+        #- Start with a deep, meaningful question
         initial_question = "How can I find meaning and purpose when facing life's greatest challenges?"
         
         print("=== Starting New Chat Session ===")
         print(f"Question: {initial_question}")
         print()
         
-        # Create new chat session
+        #- Create new chat session
         chat_response = send_message(initial_question)
         chat_id = chat_response['chat_id']
         
@@ -1439,14 +1439,14 @@ def main():
         print(chat_response['message'])
         print()
 
-        # Show suggested follow-up questions
+        #- Show suggested follow-up questions
         if chat_response['suggestions']:
             print("Suggested follow-up questions:")
             for i, suggestion in enumerate(chat_response['suggestions'], 1):
                 print(f"{i}. {suggestion}")
             print()
         
-        # Use the first suggested question for follow-up, or fallback
+        #- Use the first suggested question for follow-up, or fallback
         if chat_response['suggestions']:
             follow_up_question = chat_response['suggestions'][0]
         else:
@@ -1456,14 +1456,14 @@ def main():
         print(f"Using suggested question: {follow_up_question}")
         print()
         
-        # Send follow-up message
+        #- Send follow-up message
         follow_up_response = send_message(follow_up_question, chat_id)
         
         print("AI Response:")
         print(follow_up_response.message)
         print()
         
-        # Display final chat history
+        #- Display final chat history
         print("=== Complete Chat History ===")
         chat_history = get_chat_history(chat_id)
         
@@ -2595,9 +2595,8 @@ Control response length and source count:
 
 Now that you understand the Message API, consider exploring:
 
-1. **[Completions API](/tutorials/completions)** - For stateless interactions
-2. **[Data Search API](/api-guides/search)** - For content discovery
+1. **[Messages API](/api-reference/chat/post-message)** - For additional API information
+2. **[Completions Tutorial](/tutorials/completions)** - For stateless chat interactions
 3. **[Tool Use](/api-guides/tool-use)** - For enhanced AI capabilities
-4. **[Assistants](/product-guides/assistants)** - For specialized AI helpers
 
 The Message API provides a powerful foundation for building meaningful, contextual conversations that can help users explore deep questions about life, purpose, and human flourishing.

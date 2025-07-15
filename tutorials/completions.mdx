@@ -1,12 +1,12 @@
 ---
 title: 'Using the Completions API'
-description: 'A step-by-step recipe on how to make your first call to the Completions API.'
+description: 'Learn how to integrate with the Completions API.'
 ---
 
-This guide provides a practical, step-by-step recipe for authenticating with the Gloo AI API and making a basic call to the Chat Completions endpoint.
+This guide provides a practical, step-by-step guide for authenticating with the Gloo AI API and making a basic call to the Chat Completions endpoint.
 
 The process involves two main steps:
-1.  **Get an Access Token:** Exchange your Client ID and Client Secret for a temporary bearer token.
+1.  **Get an Access Token:** Exchange your Client ID and Client Secret for a temporary bearer token, refreshing it when needed.
 2.  **Make an API Call:** Use the access token to make an authenticated request to the `/chat/completions` endpoint.
 
 ---
@@ -20,13 +20,6 @@ You can get your **Client ID** and **Client Secret** from the [API Credentials p
 </Info>
 
 <CodeGroup>
-
-```bash  cURL
-curl -X POST "https://platform.ai.gloo.com/oauth2/token" \
-     -H "Content-Type: application/x-www-form-urlencoded" \
-     -u "YOUR_CLIENT_ID:YOUR_CLIENT_SECRET" \
-     -d 'grant_type=client_credentials&scope=api/access'
-```
 
 ```python Python
 import requests
@@ -49,7 +42,7 @@ def get_access_token():
         "scope": "api/access"
     }
 
-    # Use the auth parameter for Basic Authentication
+    #- Use the auth parameter for Basic Authentication
     response = requests.post(TOKEN_URL, headers=headers, data=data, auth=(CLIENT_ID, CLIENT_SECRET))
     response.raise_for_status()
 
@@ -58,9 +51,9 @@ def get_access_token():
 
     return token_data
 
-# Example usage:
-# access_token_info = get_access_token()
-# print(access_token_info)
+#- Example usage:
+#- access_token_info = get_access_token()
+#- print(access_token_info)
 ```
 
 ```javascript JavaScript
@@ -298,24 +291,6 @@ Once you have a valid access token, you can call the Completions API. The exampl
 
 <CodeGroup>
 
-```bash cURL
-# This example assumes you have already obtained a token
-# and stored it in a variable like $ACCESS_TOKEN.
-
-curl -X POST "https://platform.ai.gloo.com/ai/v1/chat/completions" \
-     -H "Authorization: Bearer $ACCESS_TOKEN" \
-     -H "Content-Type: application/json" \
-     -d '{
-        "model": "us.anthropic.claude-sonnet-4-20250514-v1:0",
-        "messages": [
-            {
-                "role": "user",
-                "content": "How can I be joyful in hard times?"
-            }
-        ]
-     }'
-```
-
 ```python Python
 import time
 import requests
@@ -324,7 +299,7 @@ def is_token_expired(token_info):
     """Checks if the token is expired or close to expiring."""
     if not token_info or 'expires_at' not in token_info:
         return True
-    # Check if expired, with a 60-second buffer
+    #- Check if expired, with a 60-second buffer
     return time.time() > (token_info['expires_at'] - 60)
 
 def make_chat_completion_request(token_info):
@@ -606,21 +581,21 @@ import base64
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+#- Load environment variables from .env file
 load_dotenv()
 
-# --- Configuration ---
-# It's recommended to load credentials from environment variables
+#- --- Configuration ---
+#- It's recommended to load credentials from environment variables
 CLIENT_ID = os.getenv("GLOO_CLIENT_ID", "YOUR_CLIENT_ID")
 CLIENT_SECRET = os.getenv("GLOO_CLIENT_SECRET", "YOUR_CLIENT_SECRET")
 TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token"
 API_URL = "https://platform.ai.gloo.com/ai/v1/chat/completions"
 
-# --- State Management ---
-# In a real application, you would persist this token information
+#- --- State Management ---
+#- In a real application, you would persist this token information
 access_token_info = {}
 
-# --- Function Definitions ---
+#- --- Function Definitions ---
 def get_access_token():
     """Retrieves a new access token."""
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -656,7 +631,7 @@ def make_chat_completion_request():
     response.raise_for_status()
     return response.json()
 
-# --- Main Execution ---
+#- --- Main Execution ---
 if __name__ == "__main__":
     try:
         print("Making first API call...")
@@ -1086,3 +1061,14 @@ class GlooApiClient {
 }
 ```
 </CodeGroup>
+
+---
+
+## Next Steps
+
+Now that you understand how to use the Completions API, consider exploring:
+
+1. **[Completions API](/api-reference/studio/post-completions)** - For additional API information
+2. **[Chat Tutorial](/tutorials/chat)** - For stateful chat interactions
+3. **[Tool Use](/api-guides/tool-use)** - For enhanced completion capabilities
+
