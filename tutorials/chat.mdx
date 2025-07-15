@@ -1,11 +1,11 @@
 ---
-title: 'Chat'
-description: 'Learn how to create meaningful conversations using the Gloo AI Chat and Message APIs, including session management and response handling.'
+title: 'Interactive Chat'
+description: 'Learn how to create meaningful conversations using Gloo AI.'
 ---
 
 This tutorial demonstrates how to build interactive chat experiences using Gloo AI APIs. You'll learn to create chat sessions, send messages, continue conversations, and retrieve chat history.
 
-The Message API allows for:
+The Chat and Message APIs allow for:
 - **Persistent conversations** with session management
 - **Contextual responses** that build on previous interactions
 - **Source integration** for grounded, authoritative answers
@@ -842,8 +842,11 @@ async function continueConversation(chatId, followUpMessage) {
 }
 
 // Example: Continue the conversation with a follow-up
-const followUp = "Can you give me practical steps I can take today to begin this journey?";
-const followUpResponse = await continueConversation(chatResponse.chat_id, followUp);
+const followUpQuestion = chatResponse.suggestions && chatResponse.suggestions.length > 0 
+    ? chatResponse.suggestions[0]
+    : "Can you give me practical steps I can take today to begin this journey?";
+
+const followUpResponse = await continueConversation(chatResponse.chat_id, followUpQuestion);
 
 console.log("\nFollow-up Response:");
 console.log(`Response: ${followUpResponse.message}`);
@@ -873,8 +876,10 @@ async function continueConversation(chatId: string, followUpMessage: string): Pr
 }
 
 // Example: Continue the conversation with a follow-up
-const followUp = "Can you give me practical steps I can take today to begin this journey?";
-const followUpResponse = await continueConversation(chatResponse.chat_id, followUp);
+const followUpQuestion = chatResponse.suggestions && chatResponse.suggestions.length > 0 
+    ? chatResponse.suggestions[0]
+    : "Can you give me practical steps I can take today to begin this journey?";
+const followUpResponse = await continueConversation(chatResponse.chat_id, followUpQuestion);
 
 console.log("\nFollow-up Response:");
 console.log(`Response: ${followUpResponse.message}`);
@@ -913,7 +918,9 @@ function continueConversation($chatId, $followUpMessage) {
 }
 
 // Example: Continue the conversation with a follow-up
-$followUp = "Can you give me practical steps I can take today to begin this journey?";
+$followUp = !empty($chatResponse['suggestions'])
+    ? $chatResponse['suggestions'][0]
+    : "Can you give me practical steps I can take today to begin this journey?";
 $followUpResponse = continueConversation($chatResponse['chat_id'], $followUp);
 
 echo "\nFollow-up Response:\n";
@@ -974,8 +981,13 @@ func continueConversation(chatID, followUpMessage string) (*MessageResponse, err
 }
 
 // Example: Continue the conversation with a follow-up
-followUp := "Can you give me practical steps I can take today to begin this journey?"
-followUpResponse, err := continueConversation(chatResponse.QueryID, followUp)
+var followUp string
+if len(chatResponse.Suggestions) > 0 {
+	followUp = chatResponse.Suggestions[0]
+} else {
+	followUp = "Can you give me practical steps I can take today to begin this journey?"
+}
+followUpResponse, err := continueConversation(chatResponse.ChatID, followUp)
 if err != nil {
 	fmt.Printf("Error continuing conversation: %v\n", err)
 	return
@@ -1015,13 +1027,20 @@ public static MessageResponse continueConversation(String chatId, String followU
     return gson.fromJson(response.body(), MessageResponse.class);
 }
 
-// Example: Continue the conversation with a follow-up
-public static void continueExampleConversation(String chatId) throws IOException, InterruptedException {
-    String followUp = "Can you give me practical steps I can take today to begin this journey?";
-    MessageResponse followUpResponse = continueConversation(chatId, followUp);
-    
-    System.out.println("\nFollow-up Response:");
-    System.out.println("Response: " + followUpResponse.message);
+// Modified main
+public static void main(String[] args) {
+    try {
+        // ... Code from previous step
+        
+        String followUp = (chatResponse.suggestions != null && !chatResponse.suggestions.isEmpty()) 
+            ? chatResponse.suggestions.get(0) 
+            : "Can you give me practical steps I can take today to begin this journey?";
+        MessageResponse followUpResponse = continueConversation(chatId, followUp);
+        System.out.println("\nFollow-up Response:");
+          System.out.println("Response: " + followUpResponse.message);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
 }
 ```
 
