@@ -1,0 +1,1074 @@
+---
+title: 'Using the Completions API'
+description: 'Learn how to integrate with the Completions API.'
+---
+
+This guide provides a practical, step-by-step guide for authenticating with the Gloo AI API and making a basic call to the Chat Completions endpoint.
+
+The process involves two main steps:
+1.  **Get an Access Token:** Exchange your Client ID and Client Secret for a temporary bearer token, refreshing it when needed.
+2.  **Make an API Call:** Use the access token to make an authenticated request to the `/chat/completions` endpoint.
+
+---
+
+## Step 1: Get an Access Token
+
+Before you can make API calls, you need to generate a short-lived access token. You do this by sending your Client ID and Client Secret to our OAuth2 token endpoint.
+
+<Info>
+You can get your **Client ID** and **Client Secret** from the [API Credentials page](/studio/manage-api-credentials) in the Gloo AI Studio.
+</Info>
+
+<CodeGroup>
+
+```python Python
+import requests
+import time
+
+CLIENT_ID = "YOUR_CLIENT_ID"
+CLIENT_SECRET = "YOUR_CLIENT_SECRET"
+TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token"
+
+def get_access_token():
+    """
+    Retrieves a new access token from the Gloo AI API.
+    """
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    data = {
+        "grant_type": "client_credentials",
+        "scope": "api/access"
+    }
+
+    #- Use the auth parameter for Basic Authentication
+    response = requests.post(TOKEN_URL, headers=headers, data=data, auth=(CLIENT_ID, CLIENT_SECRET))
+    response.raise_for_status()
+
+    token_data = response.json()
+    token_data['expires_at'] = int(time.time()) + token_data['expires_in']
+
+    return token_data
+
+#- Example usage:
+#- access_token_info = get_access_token()
+#- print(access_token_info)
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const CLIENT_ID = "YOUR_CLIENT_ID";
+const CLIENT_SECRET = "YOUR_CLIENT_SECRET";
+const TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token";
+
+async function getAccessToken() {
+  try {
+    const body = 'grant_type=client_credentials&scope=api/access';
+
+    const response = await axios.post(
+      TOKEN_URL,
+      body,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        auth: {
+          username: CLIENT_ID,
+          password: CLIENT_SECRET
+        }
+      }
+    );
+
+    const tokenData = response.data;
+    tokenData.expires_at = Math.floor(Date.now() / 1000) + tokenData.expires_in;
+
+    return tokenData;
+  } catch (error) {
+    console.error("Error getting access token:", error.response ? error.response.data : error.message);
+    throw error;
+  }
+}
+
+// Example usage:
+// getAccessToken().then(tokenInfo => {
+//   console.log(tokenInfo);
+// });
+```
+
+```php PHP
+<?php
+
+function getAccessToken() {
+    $clientId = 'YOUR_CLIENT_ID';
+    $clientSecret = 'YOUR_CLIENT_SECRET';
+    $tokenUrl = 'https://platform.ai.gloo.com/oauth2/token';
+    $postData = 'grant_type=client_credentials&scope=api/access';
+
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_URL, $tokenUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+    curl_setopt($ch, CURLOPT_USERPWD, $clientId . ':' . $clientSecret);
+
+    $headers = [
+        'Content-Type: application/x-www-form-urlencoded',
+    ];
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        throw new Exception(curl_error($ch));
+    }
+    curl_close($ch);
+
+    $tokenData = json_decode($result, true);
+    $tokenData['expires_at'] = time() + $tokenData['expires_in'];
+
+    return $tokenData;
+}
+
+// Example usage:
+// $tokenInfo = getAccessToken();
+// print_r($tokenInfo);
+?>
+```
+
+```go Go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
+	"time"
+)
+
+const (
+	clientID     = "YOUR_CLIENT_ID"
+	clientSecret = "YOUR_CLIENT_SECRET"
+	tokenURL     = "https://platform.ai.gloo.com/oauth2/token"
+)
+
+type TokenInfo struct {
+	AccessToken string `json:"access_token"`
+	ExpiresIn   int    `json:"expires_in"`
+	ExpiresAt   int64  `json:"expires_at"`
+	TokenType   string `json:"token_type"`
+}
+
+func getAccessToken() (*TokenInfo, error) {
+	data := strings.NewReader("grant_type=client_credentials&scope=api/access")
+	req, err := http.NewRequest("POST", tokenURL, data)
+	if err != nil {
+		return nil, err
+	}
+
+	req.SetBasicAuth(clientID, clientSecret)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to get token: %s - %s", resp.Status, string(bodyBytes))
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var tokenInfo TokenInfo
+	if err := json.Unmarshal(body, &tokenInfo); err != nil {
+		return nil, err
+	}
+
+	tokenInfo.ExpiresAt = time.Now().Unix() + int64(tokenInfo.ExpiresIn)
+
+	return &tokenInfo, nil
+}
+
+/*
+// Example usage:
+func main() {
+    tokenData, err := getAccessToken()
+    if err != nil {
+        fmt.Println("Error:", err)
+        return
+    }
+    fmt.Printf("%+v\n", tokenData)
+}
+*/
+```
+
+```java Java
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Instant;
+import java.util.Base64;
+import com.google.gson.Gson;
+
+public class GlooApiAuth {
+
+    private static final String CLIENT_ID = "YOUR_CLIENT_ID";
+    private static final String CLIENT_SECRET = "YOUR_CLIENT_SECRET";
+    private static final String TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token";
+
+    public static class TokenInfo {
+        public String access_token;
+        public int expires_in;
+        public long expires_at;
+        public String token_type;
+    }
+
+    public static TokenInfo getAccessToken() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        String auth = CLIENT_ID + ":" + CLIENT_SECRET;
+        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+        String requestBody = "grant_type=client_credentials&scope=api/access";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(TOKEN_URL))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .header("Authorization", "Basic " + encodedAuth)
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new IOException("Failed to get access token: " + response.body());
+        }
+
+        Gson gson = new Gson();
+        TokenInfo tokenInfo = gson.fromJson(response.body(), TokenInfo.class);
+
+        tokenInfo.expires_at = Instant.now().getEpochSecond() + tokenInfo.expires_in;
+
+        return tokenInfo;
+    }
+
+    /*
+    // Example usage:
+    public static void main(String[] args) {
+        try {
+            TokenInfo token = getAccessToken();
+            Gson gson = new Gson();
+            String jsonOutput = gson.toJson(token);
+            System.out.println(jsonOutput);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    */
+}
+```
+
+
+</CodeGroup>
+
+A successful response will contain your `access_token`, its `token_type`, and its `expires_in` duration in seconds.
+
+---
+
+## Step 2: Make a Chat Completion Call
+
+Once you have a valid access token, you can call the Completions API. The examples below show a basic request.
+
+<CodeGroup>
+
+```python Python
+import time
+import requests
+
+def is_token_expired(token_info):
+    """Checks if the token is expired or close to expiring."""
+    if not token_info or 'expires_at' not in token_info:
+        return True
+    #- Check if expired, with a 60-second buffer
+    return time.time() > (token_info['expires_at'] - 60)
+
+def make_chat_completion_request(token_info):
+    """Makes a chat completion request, refreshing the token if needed."""
+
+    if is_token_expired(token_info):
+        print("Token is expired or missing. Fetching a new one...")
+        token_info = get_access_token()
+
+    api_url = "https://platform.ai.gloo.com/ai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {token_info['access_token']}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+        "messages": [
+            {"role": "user", "content": "How can I be joyful in hard times?"}
+        ]
+    }
+
+    response = requests.post(api_url, headers=headers, json=payload)
+    response.raise_for_status()
+
+    return response.json()
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+// let accessTokenInfo = { access_token: "...", expires_at: 1752250000 };
+
+function isTokenExpired(tokenInfo) {
+  if (!tokenInfo || !tokenInfo.expires_at) {
+    return true;
+  }
+  // Check if expired, with a 60-second buffer
+  return Date.now() / 1000 > (tokenInfo.expires_at - 60);
+}
+
+async function makeChatCompletionRequest(tokenInfo) {
+  try {
+    if (isTokenExpired(tokenInfo)) {
+      console.log("Token is expired or missing. Fetching a new one...");
+      tokenInfo = await getAccessToken();
+    }
+
+    const apiUrl = "https://platform.ai.gloo.com/ai/v1/chat/completions";
+    const payload = {
+      model: "us.anthropic.claude-sonnet-4-20250514-v1:0",
+      messages: [
+        { role: "user", content: "How can I be joyful in hard times?" },
+      ],
+    };
+
+    const response = await axios.post(apiUrl, payload, {
+      headers: {
+        'Authorization': `Bearer ${tokenInfo.access_token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error making chat completion request:", error.response ? error.response.data : error.message);
+    throw error;
+  }
+}
+```
+
+```php PHP
+<?php
+
+function isTokenExpired($tokenInfo) {
+    if (empty($tokenInfo) || !isset($tokenInfo['expires_at'])) {
+        return true;
+    }
+    // Check if expired, with a 60-second buffer
+    return time() > ($tokenInfo['expires_at'] - 60);
+}
+
+function makeChatCompletionRequest(&$tokenInfo) {
+    if (isTokenExpired($tokenInfo)) {
+        echo "Token is expired or missing. Fetching a new one...\n";
+        $tokenInfo = getAccessToken(); // Assumes getAccessToken function from Step 1
+    }
+
+    $apiUrl = 'https://platform.ai.gloo.com/ai/v1/chat/completions';
+    $payload = json_encode([
+        'model' => 'us.anthropic.claude-sonnet-4-20250514-v1:0',
+        'messages' => [
+            ['role' => 'user', 'content' => 'How can I be joyful in hard times?']
+        ]
+    ]);
+
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_URL, $apiUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+
+    $headers = [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $tokenInfo['access_token'],
+    ];
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        throw new Exception(curl_error($ch));
+    }
+    curl_close($ch);
+
+    return json_decode($result, true);
+}
+?>
+```
+
+```go Go
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"time"
+)
+
+// Assume TokenInfo struct and getAccessToken function from Step 1 exist
+
+func isTokenExpired(tokenInfo *TokenInfo) bool {
+	if tokenInfo == nil || tokenInfo.ExpiresAt == 0 {
+		return true
+	}
+	// Check if expired, with a 60-second buffer
+	return time.Now().Unix() > (tokenInfo.ExpiresAt - 60)
+}
+
+func makeChatCompletionRequest(tokenInfo *TokenInfo) (map[string]interface{}, *TokenInfo, error) {
+	var err error
+	if isTokenExpired(tokenInfo) {
+		fmt.Println("Token is expired or missing. Fetching a new one...")
+		tokenInfo, err = getAccessToken()
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	apiUrl := "https://platform.ai.gloo.com/ai/v1/chat/completions"
+
+	payload := map[string]interface{}{
+		"model": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+		"messages": []map[string]string{
+			{"role": "user", "content": "How can I be joyful in hard times?"},
+		},
+	}
+	jsonPayload, _ := json.Marshal(payload)
+
+	req, err := http.NewRequest("POST", apiUrl, bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return nil, tokenInfo, err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+tokenInfo.AccessToken)
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, tokenInfo, err
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, tokenInfo, fmt.Errorf("API call failed: %s - %s", resp.Status, string(body))
+	}
+
+	var result map[string]interface{}
+	json.Unmarshal(body, &result)
+
+	return result, tokenInfo, nil
+}
+```
+
+```java Java
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Instant;
+import com.google.gson.Gson;
+
+public class GlooApiClient {
+
+    // Assume TokenInfo class and getAccessToken method from Step 1 exist
+    private static TokenInfo tokenInfo;
+
+    private static boolean isTokenExpired(TokenInfo token) {
+        if (token == null || token.expires_at == 0) {
+            return true;
+        }
+        // Check if expired, with a 60-second buffer
+        return Instant.now().getEpochSecond() > (token.expires_at - 60);
+    }
+
+    public static String makeChatCompletionRequest() throws IOException, InterruptedException {
+        if (isTokenExpired(tokenInfo)) {
+            System.out.println("Token is expired or missing. Fetching a new one...");
+            tokenInfo = GlooApiAuth.getAccessToken();
+        }
+
+        String apiUrl = "https://platform.ai.gloo.com/ai/v1/chat/completions";
+
+        String payload = """
+        {
+            "model": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "How can I be joyful in hard times?"
+                }
+            ]
+        }
+        """;
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(apiUrl))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + tokenInfo.access_token)
+                .POST(HttpRequest.BodyPublishers.ofString(payload))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new IOException("API call failed: " + response.body());
+        }
+
+        return response.body();
+    }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Complete Examples
+
+The following examples combine token retrieval, expiration checking, and the API call into a single, runnable script for each language.
+
+You'll want to first set up your environment variables in either an `.env` file:
+
+```
+GLOO_CLIENT_ID=YOUR_CLIENT_ID
+GLOO_CLIENT_SECRET=YOUR_CLIENT_SECRET
+```
+
+Or export them in your shell for Go and Java:
+
+```bash
+export GLOO_CLIENT_ID="your_actual_client_id_here"
+export GLOO_CLIENT_SECRET="your_actual_client_secret_here"
+```
+
+<CodeGroup>
+```python Python
+import requests
+import time
+import base64
+import os
+from dotenv import load_dotenv
+
+#- Load environment variables from .env file
+load_dotenv()
+
+#- --- Configuration ---
+#- It's recommended to load credentials from environment variables
+CLIENT_ID = os.getenv("GLOO_CLIENT_ID", "YOUR_CLIENT_ID")
+CLIENT_SECRET = os.getenv("GLOO_CLIENT_SECRET", "YOUR_CLIENT_SECRET")
+TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token"
+API_URL = "https://platform.ai.gloo.com/ai/v1/chat/completions"
+
+#- --- State Management ---
+#- In a real application, you would persist this token information
+access_token_info = {}
+
+#- --- Function Definitions ---
+def get_access_token():
+    """Retrieves a new access token."""
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    data = {"grant_type": "client_credentials", "scope": "api/access"}
+    response = requests.post(TOKEN_URL, headers=headers, data=data, auth=(CLIENT_ID, CLIENT_SECRET))
+    response.raise_for_status()
+    token_data = response.json()
+    token_data['expires_at'] = int(time.time()) + token_data['expires_in']
+    return token_data
+
+def is_token_expired(token_info):
+    """Checks if the token is expired or close to expiring."""
+    if not token_info or 'expires_at' not in token_info:
+        return True
+    return time.time() > (token_info['expires_at'] - 60)
+
+def make_chat_completion_request():
+    """Makes a chat completion request, refreshing the token if needed."""
+    global access_token_info
+    if is_token_expired(access_token_info):
+        print("Token is expired or missing. Fetching a new one...")
+        access_token_info = get_access_token()
+
+    headers = {
+        "Authorization": f"Bearer {access_token_info['access_token']}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+        "messages": [{"role": "user", "content": "How can I be joyful in hard times?"}]
+    }
+    response = requests.post(API_URL, headers=headers, json=payload)
+    response.raise_for_status()
+    return response.json()
+
+#- --- Main Execution ---
+if __name__ == "__main__":
+    try:
+        print("Making first API call...")
+        completion1 = make_chat_completion_request()
+        print("First call successful:", completion1['choices'][0]['message']['content'])
+
+        print("\nMaking second API call (should use cached token)...")
+        completion2 = make_chat_completion_request()
+        print("Second call successful:", completion2['choices'][0]['message']['content'])
+    except requests.exceptions.HTTPError as err:
+        print(f"An HTTP error occurred: {err}")
+    except Exception as err:
+        print(f"An error occurred: {err}")
+```
+
+```javascript JavaScript
+// Load environment variables from .env file
+require('dotenv').config();
+
+const axios = require('axios');
+
+// --- Configuration ---
+const CLIENT_ID = process.env.GLOO_CLIENT_ID || "YOUR_CLIENT_ID";
+const CLIENT_SECRET = process.env.GLOO_CLIENT_SECRET || "YOUR_CLIENT_SECRET";
+const TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token";
+const API_URL = "https://platform.ai.gloo.com/ai/v1/chat/completions";
+
+// --- State Management ---
+let tokenInfo = {};
+
+// --- Function Definitions ---
+async function getAccessToken() {
+    const body = 'grant_type=client_credentials&scope=api/access';
+    const response = await axios.post(TOKEN_URL, body, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        auth: { username: CLIENT_ID, password: CLIENT_SECRET }
+    });
+    const tokenData = response.data;
+    tokenData.expires_at = Math.floor(Date.now() / 1000) + tokenData.expires_in;
+    return tokenData;
+}
+
+function isTokenExpired(token) {
+    if (!token || !token.expires_at) return true;
+    return (Date.now() / 1000) > (token.expires_at - 60);
+}
+
+async function makeChatCompletionRequest() {
+    if (isTokenExpired(tokenInfo)) {
+        console.log("Token is expired or missing. Fetching a new one...");
+        tokenInfo = await getAccessToken();
+    }
+
+    const payload = {
+        model: "us.anthropic.claude-sonnet-4-20250514-v1:0",
+        messages: [{ role: "user", content: "How can I be joyful in hard times?" }],
+    };
+    const response = await axios.post(API_URL, payload, {
+        headers: {
+            'Authorization': `Bearer ${tokenInfo.access_token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    return response.data;
+}
+
+// --- Main Execution ---
+async function main() {
+    try {
+        console.log("Making first API call...");
+        const completion1 = await makeChatCompletionRequest();
+        console.log("First call successful:", completion1.choices[0].message.content);
+
+        console.log("\nMaking second API call (should use cached token)...");
+        const completion2 = await makeChatCompletionRequest();
+        console.log("Second call successful:", completion2.choices[0].message.content);
+    } catch (error) {
+        console.error("An error occurred:", error.response ? error.response.data : error.message);
+    }
+}
+
+main();
+```
+
+```php PHP
+<?php
+// --- main.php ---
+
+require_once 'vendor/autoload.php';
+
+// Load .env file
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+// --- Configuration ---
+$CLIENT_ID = getenv('GLOO_CLIENT_ID') ?: 'YOUR_CLIENT_ID';
+$CLIENT_SECRET = getenv('GLOO_CLIENT_SECRET') ?: 'YOUR_CLIENT_SECRET';
+$TOKEN_URL = 'https://platform.ai.gloo.com/oauth2/token';
+$API_URL = 'https://platform.ai.gloo.com/ai/v1/chat/completions';
+
+// --- State Management ---
+$tokenInfo = [];
+
+// --- Function Definitions ---
+function getAccessToken($clientId, $clientSecret, $tokenUrl) {
+    $postData = 'grant_type=client_credentials&scope=api/access';
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $tokenUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+    curl_setopt($ch, CURLOPT_USERPWD, $clientId . ':' . $clientSecret);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) throw new Exception(curl_error($ch));
+    curl_close($ch);
+    $tokenData = json_decode($result, true);
+    $tokenData['expires_at'] = time() + $tokenData['expires_in'];
+    return $tokenData;
+}
+
+function isTokenExpired($token) {
+    if (empty($token) || !isset($token['expires_at'])) return true;
+    return time() > ($token['expires_at'] - 60);
+}
+
+function makeChatCompletionRequest($apiUrl, &$tokenInfo, $clientId, $clientSecret, $tokenUrl) {
+    if (isTokenExpired($tokenInfo)) {
+        echo "Token is expired or missing. Fetching a new one...\n";
+        $tokenInfo = getAccessToken($clientId, $clientSecret, $tokenUrl);
+    }
+
+    $payload = json_encode([
+        'model' => 'us.anthropic.claude-sonnet-4-20250514-v1:0',
+        'messages' => [['role' => 'user', 'content' => 'How can I be joyful in hard times?']]
+    ]);
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $apiUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $tokenInfo['access_token'],
+    ]);
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) throw new Exception(curl_error($ch));
+    curl_close($ch);
+    return json_decode($result, true);
+}
+
+// --- Main Execution ---
+try {
+    echo "Making first API call...\n";
+    $completion1 = makeChatCompletionRequest($API_URL, $tokenInfo, $CLIENT_ID, $CLIENT_SECRET, $TOKEN_URL);
+    echo "First call successful: " . $completion1['choices'][0]['message']['content'] . "\n";
+
+    echo "\nMaking second API call (should use cached token)...\n";
+    $completion2 = makeChatCompletionRequest($API_URL, $tokenInfo, $CLIENT_ID, $CLIENT_SECRET, $TOKEN_URL);
+    echo "Second call successful: " . $completion2['choices'][0]['message']['content'] . "\n";
+} catch (Exception $e) {
+    echo 'Error: ' . $e->getMessage();
+}
+?>
+```
+
+```go Go
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"strings"
+	"time"
+)
+
+// --- Configuration ---
+var (
+	clientID     = getEnv("GLOO_CLIENT_ID", "YOUR_CLIENT_ID")
+	clientSecret = getEnv("GLOO_CLIENT_SECRET", "YOUR_CLIENT_SECRET")
+	tokenURL     = "https://platform.ai.gloo.com/oauth2/token"
+	apiURL       = "https://platform.ai.gloo.com/ai/v1/chat/completions"
+)
+
+// --- State Management ---
+var tokenInfo *TokenInfo
+
+// --- Data Structures ---
+type TokenInfo struct {
+	AccessToken string `json:"access_token"`
+	ExpiresIn   int    `json:"expires_in"`
+	ExpiresAt   int64  `json:"expires_at"`
+	TokenType   string `json:"token_type"`
+}
+
+// --- Function Definitions ---
+func getAccessToken() (*TokenInfo, error) {
+	data := strings.NewReader("grant_type=client_credentials&scope=api/access")
+	req, err := http.NewRequest("POST", tokenURL, data)
+	if err != nil {
+		return nil, err
+	}
+
+	req.SetBasicAuth(clientID, clientSecret)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to get token: %s - %s", resp.Status, string(bodyBytes))
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var localTokenInfo TokenInfo
+	if err := json.Unmarshal(body, &localTokenInfo); err != nil {
+		return nil, err
+	}
+
+	localTokenInfo.ExpiresAt = time.Now().Unix() + int64(localTokenInfo.ExpiresIn)
+	return &localTokenInfo, nil
+}
+
+func isTokenExpired(token *TokenInfo) bool {
+	if token == nil || token.ExpiresAt == 0 {
+		return true
+	}
+	return time.Now().Unix() > (token.ExpiresAt - 60)
+}
+
+func makeChatCompletionRequest() (map[string]interface{}, error) {
+	var err error
+	if isTokenExpired(tokenInfo) {
+		fmt.Println("Token is expired or missing. Fetching a new one...")
+		tokenInfo, err = getAccessToken()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	payload := map[string]interface{}{
+		"model": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+		"messages": []map[string]string{
+			{"role": "user", "content": "How can I be joyful in hard times?"},
+		},
+	}
+	jsonPayload, _ := json.Marshal(payload)
+
+	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+tokenInfo.AccessToken)
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API call failed: %s - %s", resp.Status, string(body))
+	}
+
+	var result map[string]interface{}
+	json.Unmarshal(body, &result)
+
+	return result, nil
+}
+
+// Helper to get environment variables
+func getEnv(key, fallback string) string {
+    if value, ok := os.LookupEnv(key); ok {
+        return value
+    }
+    return fallback
+}
+
+
+// --- Main Execution ---
+func main() {
+	fmt.Println("Making first API call...")
+	completion1, err := makeChatCompletionRequest()
+	if err != nil {
+		fmt.Println("Error on first call:", err)
+		return
+	}
+    // Safely parse the response
+    if choices, ok := completion1["choices"].([]interface{}); ok && len(choices) > 0 {
+        if choice, ok := choices[0].(map[string]interface{}); ok {
+            if message, ok := choice["message"].(map[string]interface{}); ok {
+                fmt.Println("First call successful:", message["content"])
+            }
+        }
+    }
+
+	fmt.Println("\nMaking second API call (should use cached token)...")
+	completion2, err := makeChatCompletionRequest()
+	if err != nil {
+		fmt.Println("Error on second call:", err)
+		return
+	}
+    if choices, ok := completion2["choices"].([]interface{}); ok && len(choices) > 0 {
+        if choice, ok := choices[0].(map[string]interface{}); ok {
+            if message, ok := choice["message"].(map[string]interface{}); ok {
+                fmt.Println("Second call successful:", message["content"])
+            }
+        }
+    }
+}
+```
+
+```java Java
+import com.google.gson.Gson;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+
+// --- Main Application Class ---
+public class Main {
+    public static void main(String[] args) {
+        GlooApiClient client = new GlooApiClient();
+        try {
+            System.out.println("Making first API call...");
+            String content1 = client.getChatCompletionContent();
+            System.out.println("First call successful: " + content1);
+
+            System.out.println("\nMaking second API call (should use cached token)...");
+            String content2 = client.getChatCompletionContent();
+            System.out.println("Second call successful: " + content2);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+// --- API Client Class (GlooApiClient.java) ---
+class GlooApiClient {
+    private static final String CLIENT_ID = System.getenv().getOrDefault("GLOO_CLIENT_ID", "YOUR_CLIENT_ID");
+    private static final String CLIENT_SECRET = System.getenv().getOrDefault("GLOO_CLIENT_SECRET", "YOUR_CLIENT_SECRET");
+    private static final String TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token";
+    private static final String API_URL = "https://platform.ai.gloo.com/ai/v1/chat/completions";
+
+    private TokenInfo tokenInfo;
+    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final Gson gson = new Gson();
+
+    // --- Token Management ---
+    private static class TokenInfo {
+        String access_token;
+        int expires_in;
+        long expires_at;
+    }
+
+    private void fetchAccessToken() throws IOException, InterruptedException {
+        String auth = CLIENT_ID + ":" + CLIENT_SECRET;
+        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+        String requestBody = "grant_type=client_credentials&scope=api/access";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(TOKEN_URL))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .header("Authorization", "Basic " + encodedAuth)
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) throw new IOException("Failed to get token: " + response.body());
+
+        this.tokenInfo = gson.fromJson(response.body(), TokenInfo.class);
+        this.tokenInfo.expires_at = Instant.now().getEpochSecond() + this.tokenInfo.expires_in;
+    }
+
+    private boolean isTokenExpired() {
+        if (this.tokenInfo == null || this.tokenInfo.expires_at == 0) return true;
+        return Instant.now().getEpochSecond() > (this.tokenInfo.expires_at - 60);
+    }
+
+    // --- Public Method ---
+    public String getChatCompletionContent() throws IOException, InterruptedException {
+        if (isTokenExpired()) {
+            System.out.println("Token is expired or missing. Fetching a new one...");
+            fetchAccessToken();
+        }
+
+        String payload = "{\"model\": \"us.anthropic.claude-sonnet-4-20250514-v1:0\", \"messages\": [{\"role\": \"user\", \"content\": \"How can I be joyful in hard times?\"}]}";
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_URL))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + this.tokenInfo.access_token)
+                .POST(HttpRequest.BodyPublishers.ofString(payload))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) throw new IOException("API call failed: " + response.body());
+
+        // Parse the response to extract the message content
+        Map<String, Object> responseMap = gson.fromJson(response.body(), Map.class);
+        List<Map<String, Object>> choices = (List<Map<String, Object>>) responseMap.get("choices");
+        Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+        return (String) message.get("content");
+    }
+}
+```
+</CodeGroup>
+
+---
+
+## Next Steps
+
+Now that you understand how to use the Completions API, consider exploring:
+
+1. **[Completions API](/api-reference/studio/post-completions)** - For additional API information
+2. **[Chat Tutorial](/tutorials/chat)** - For stateful chat interactions
+3. **[Tool Use](/api-guides/tool-use)** - For enhanced completion capabilities
+

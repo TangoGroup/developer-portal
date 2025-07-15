@@ -108,7 +108,7 @@
             ]
           },
           {
-            "group": "Messages",
+            "group": "Message",
             "pages": [
               "api-reference/chat/post-message",
               "api-reference/chat/update-message",
@@ -147,7 +147,7 @@
       },
       {
         "tab": "Tutorials",
-        "pages": ["tutorials/overview"]
+        "pages": ["tutorials/overview", "tutorials/completions", "tutorials/chat"]
       },
       {
         "tab": "Best Practices",
