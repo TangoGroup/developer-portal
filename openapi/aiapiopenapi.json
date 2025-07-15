@@ -57,6 +57,9 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "detail": "Failed to find user"
                 }
@@ -108,35 +111,35 @@
                   "created_at": "2025-07-14T19:04:56.974882",
                   "updated_at": "2025-07-14T19:05:03.205307",
                   "messages": [
-                      {
-                          "query_id": "q912f58e9-135b-4f95-8853-d98f7b5294f6",
-                          "message_id": "mfdca4b99-c672-4f76-8b48-dcf550be9500",
-                          "timestamp": "2025-07-14T19:04:58.449394",
-                          "role": "user",
-                          "character_limit": 0,
-                          "stream": false,
-                          "intent": 0,
-                          "message": "What is your name?",
-                          "model": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
-                          "publishers": []
-                      },
-                      {
-                          "query_id": "q912f58e9-135b-4f95-8853-d98f7b5294f6",
-                          "message_id": "mfc7bc417-c089-4806-8b61-51ba24b09898",
-                          "timestamp": "2025-07-14T19:04:59.679262",
-                          "role": "kallm",
-                          "intent": 0,
-                          "sources_limit": 0,
-                          "sources": [],
-                          "success": true,
-                          "suggestions": [
-                              "How can I use AI?",
-                              "What can KALLM help me with?",
-                              "Can I ask you for advice?"
-                          ],
-                          "message": "My name is Gloo AI Chat. How can I assist you today?",
-                          "model": "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
-                      }
+                    {
+                      "query_id": "q912f58e9-135b-4f95-8853-d98f7b5294f6",
+                      "message_id": "mfdca4b99-c672-4f76-8b48-dcf550be9500",
+                      "timestamp": "2025-07-14T19:04:58.449394",
+                      "role": "user",
+                      "character_limit": 0,
+                      "stream": false,
+                      "intent": 0,
+                      "message": "What is your name?",
+                      "model": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+                      "publishers": []
+                    },
+                    {
+                      "query_id": "q912f58e9-135b-4f95-8853-d98f7b5294f6",
+                      "message_id": "mfc7bc417-c089-4806-8b61-51ba24b09898",
+                      "timestamp": "2025-07-14T19:04:59.679262",
+                      "role": "kallm",
+                      "intent": 0,
+                      "sources_limit": 0,
+                      "sources": [],
+                      "success": true,
+                      "suggestions": [
+                        "How can I use AI?",
+                        "What can KALLM help me with?",
+                        "Can I ask you for advice?"
+                      ],
+                      "message": "My name is Gloo AI Chat. How can I assist you today?",
+                      "model": "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+                    }
                   ],
                   "pin": false,
                   "summary": null,
@@ -149,6 +152,9 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "detail": "Failed to find chat"
                 }
@@ -192,6 +198,9 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "detail": "Failed to create chat"
                 }
@@ -267,6 +276,9 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "detail": "Invalid value"
                 }
@@ -320,6 +332,9 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "detail": "Failed to find chat"
                 }
@@ -330,17 +345,17 @@
             "description": "Unprocessable Entity",
             "content": {
               "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                },
                 "example": {
                   "detail": [
-                      {
-                          "type": "missing",
-                          "loc": [
-                              "query",
-                              "chat_id"
-                          ],
-                          "msg": "Field required",
-                          "input": null
-                      }
+                    {
+                      "type": "missing",
+                      "loc": ["query", "chat_id"],
+                      "msg": "Field required",
+                      "input": null
+                    }
                   ]
                 }
               }
@@ -461,9 +476,9 @@
                   "sources": [],
                   "sources_limit": 0,
                   "suggestions": [
-                      "How can I use AI?",
-                      "What can KALLM help me with?",
-                      "Can I ask you for advice?"
+                    "How can I use AI?",
+                    "What can KALLM help me with?",
+                    "Can I ask you for advice?"
                   ],
                   "intent": 0
                 }
@@ -474,6 +489,9 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "detail": "Failed to find chat"
                 }
@@ -561,6 +579,9 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "detail": "Failed to find chat"
                 }
@@ -642,6 +663,9 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "detail": "Failed to find message"
                 }
@@ -768,6 +792,9 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "detail": "Failed to find chat"
                 }
@@ -814,6 +841,9 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "detail": "Failed to find user"
                 }
@@ -853,20 +883,20 @@
                 "example": {
                   "id": "chatcmpl-d7007d2f",
                   "choices": [
-                      {
-                          "finish_reason": "stop",
-                          "index": 0,
-                          "logprobs": null,
-                          "message": {
-                              "content": "Hello. It's nice to meet you. Is there something I can help you with or would you like to chat?",
-                              "refusal": null,
-                              "role": "assistant",
-                              "annotations": null,
-                              "audio": null,
-                              "function_call": null,
-                              "tool_calls": null
-                          }
+                    {
+                      "finish_reason": "stop",
+                      "index": 0,
+                      "logprobs": null,
+                      "message": {
+                        "content": "Hello. It's nice to meet you. Is there something I can help you with or would you like to chat?",
+                        "refusal": null,
+                        "role": "assistant",
+                        "annotations": null,
+                        "audio": null,
+                        "function_call": null,
+                        "tool_calls": null
                       }
+                    }
                   ],
                   "created": 1752600200,
                   "model": "us.meta.llama3-3-70b-instruct-v1:0",
@@ -874,11 +904,11 @@
                   "service_tier": null,
                   "system_fingerprint": "fp",
                   "usage": {
-                      "completion_tokens": 25,
-                      "prompt_tokens": 1707,
-                      "total_tokens": 1732,
-                      "completion_tokens_details": null,
-                      "prompt_tokens_details": null
+                    "completion_tokens": 25,
+                    "prompt_tokens": 1707,
+                    "total_tokens": 1732,
+                    "completion_tokens_details": null,
+                    "prompt_tokens_details": null
                   }
                 }
               }
@@ -888,6 +918,9 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "detail": "Model is required."
                 }
@@ -1280,6 +1313,9 @@
             "description": "Bad Request",
             "content": {
               "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "detail": "error message"
                 }
@@ -2545,6 +2581,16 @@
             "description": "Summary for level 3 heading/section."
           }
         }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string",
+            "description": "A human-readable description of the error."
+          }
+        },
+        "title": "Error"
       }
     },
     "securitySchemes": {
