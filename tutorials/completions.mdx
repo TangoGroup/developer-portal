@@ -22,7 +22,7 @@ The Completions API requires Bearer token authentication. If you haven't set up 
 
 ---
 
-## Step 1: Make a Chat Completion Call
+## Make a Chat Completion Call
 
 Once you have a valid access token (using the authentication methods from the [Authentication Tutorial](/tutorials/authentication)), you can call the Completions API. The examples below show a basic request.
 
@@ -581,7 +581,7 @@ async function makeChatCompletionRequest(): Promise<ChatCompletionResponse> {
         model: "us.anthropic.claude-sonnet-4-20250514-v1:0",
         messages: [{ role: "user", content: "How can I be joyful in hard times?" }],
     };
-    
+
     const response = await axios.post<ChatCompletionResponse>(API_URL, payload, {
         headers: {
             'Authorization': `Bearer ${tokenInfo!.access_token}`,
@@ -965,4 +965,3 @@ Now that you understand how to use the Completions API, consider exploring:
 2. **[Completions API](/api-reference/studio/post-completions)** - For additional API information
 3. **[Chat Tutorial](/tutorials/chat)** - For stateful chat interactions
 4. **[Tool Use](/api-guides/tool-use)** - For enhanced completion capabilities
-
