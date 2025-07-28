@@ -1,0 +1,155 @@
+# Item Recommendations API Guide
+
+A developer's guide to surfacing relevant content from your organization's own data.
+
+## What is the Item Recommendations API?
+
+The Item Recommendations endpoints provide similar functionality to the [Affiliate Recommendations API](/api-guides/search-and-recommendations/affiliate-recommendations), but with a key difference: **it only returns items that your organization has access to.** This protects intellectual property while enabling powerful content discovery features for your users.
+
+The search and ranking logic, based on snippet count and cumulative certainty, is identical to the Affiliate Recommendations API.
+
+Please note that once a publisher allows their content to be used as a reference, it may take up to 24 hours for search queries to include their items in returned data.
+
+### Endpoints
+
+There are two distinct endpoints for item recommendations:
+
+-   **`/recommendations/base`**: Returns item and snippet metadata but keeps the snippet text itself hidden.
+-   **`/recommendations/verbose`**: Returns item and snippet data, **including** the full snippet text.
+
+## How to Use the API
+
+### Parameters
+
+| Parameter                   | Description                                                                                         | Required |
+| --------------------------- | --------------------------------------------------------------------------------------------------- | -------- |
+| `query`                     | The prompt that the user enters into the application.                                               | **Yes** |
+| `collection`                | The collection to search in.                                                                        | **Yes** |
+| `tenant`                    | The tenant to search.                                                                               | **Yes** |
+| `publishers`                | A list of Publisher Names. Only publishers belonging to your organization are allowed.              | **Yes** |
+| `max_snippet_count_overall` | The maximum number of snippets to search through overall.                                           | **Yes** |
+| `media_types`               | An array of media types to filter by (`audio`, `video`, `book`, `article`).                         | No       |
+| `min_snippet_count_per_item`| The minimum number of snippets an item must have to be returned. Must be at least 1.                 | No       |
+
+### Making a Request
+
+An API key is necessary to call these endpoints. You can get one by visiting the **API Credentials** page to generate a token using the OAuth2 Client Credentials flow.
+
+---
+
+### Base Recommendations
+
+This endpoint returns snippet metadata without the snippet text.
+
+`POST /ai/v1/data/items/recommendations/base`
+
+#### Example Request (`/base`)
+
+```bash
+curl -X 'POST' \
+  '[https://platform.ai.gloo.com/ai/v1/data/items/recommendations/base](https://platform.ai.gloo.com/ai/v1/data/items/recommendations/base)' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer ${ACCESS_TOKEN}' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "collection": "DataEngineDev",
+  "max_snippet_count_overall": 10,
+  "media_types": [],
+  "min_snippet_count_per_item": 1,
+  "publishers": ["Test New Tenant"],
+  "query": "Plans God has for me",
+  "tenant": "TestNewTenant"
+}'
+```
+
+#### Example Response (`/base`)
+
+As shown below, the `uuids` array contains snippet metadata, but not the snippet text itself.
+
+```json
+[
+  {
+    "item_id": "c42fc709-01dd-4eb1-94ab-01e076e141da",
+    "publisher": "Test New Tenant",
+    "type": "Book",
+    "uuids": [
+      {
+        "uuid": "eca2616f-823a-5800-b7b2-c0c80ad84ec4",
+        "ai_title": "Understanding God's Plan: It's Simpler Than You Think",
+        "ai_subtitle": "Why Finding God's Will Isn't a Treasure Hunt",
+        "summary": "The divine plan manifests through our daily acts of goodness, rather than existing as a predetermined sequence we must discover.",
+        "time_start": "",
+        "time_end": "",
+        "part": 128,
+        "certainty": 0.7546200752258301
+      }
+    ],
+    "snippet_count": 1,
+    "cumulative_certainty": 0.7546200752258301
+  }
+]
+```
+
+---
+
+### Verbose Recommendations
+
+This endpoint returns the full snippet text.
+
+`POST /ai/v1/data/items/recommendations/verbose`
+
+#### Example Request (`/verbose`)
+
+```bash
+curl -X 'POST' \
+  '[https://platform.ai.gloo.com/ai/v1/data/items/recommendations/verbose](https://platform.ai.gloo.com/ai/v1/data/items/recommendations/verbose)' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer ${ACCESS_TOKEN}' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "collection": "DataEngineDev",
+  "max_snippet_count_overall": 10,
+  "media_types": [],
+  "min_snippet_count_per_item": 1,
+  "publishers": ["Test New Tenant"],
+  "query": "Plans God has for me",
+  "tenant": "TestNewTenant"
+}'
+```
+
+#### Example Response (`/verbose`)
+
+Note the addition of the `snippet` field in the `uuids` array.
+
+```json
+[
+  {
+    "item_id": "c42fc709-01dd-4eb1-94ab-01e076e141da",
+    "publisher": "Test New Tenant",
+    "type": "Book",
+    "uuids": [
+      {
+        "uuid": "eca2616f-823a-5800-b7b2-c0c80ad84ec4",
+        "ai_title": "Understanding God's Plan: It's Simpler Than You Think",
+        "ai_subtitle": "Why Finding God's Will Isn't a Treasure Hunt",
+        "snippet": "This way of thinking about \"God's plan for your life\" is guaranteed to give us a headache—and it's just not how he operates. It's not that God's holding the treasure map and we have to guess the route to the X that marks the spot...",
+        "summary": "The divine plan manifests through our daily acts of goodness, rather than existing as a predetermined sequence we must discover.",
+        "time_start": "",
+        "time_end": "",
+        "part": 128,
+        "certainty": 0.7546232342720032
+      }
+    ],
+    "snippet_count": 1,
+    "cumulative_certainty": 0.7546232342720032
+  }
+]
+```
+
+## Use Cases
+
+The Item Recommendations API is ideal for a publisher looking to increase exposure and engagement with their own content.
+
+For example, a user could enter a query on a publisher's website. The publisher could then use the `/base` endpoint to recommend their own relevant books, articles, or videos. This enhances content discovery and keeps users engaged on the platform.
+
+If the publisher wanted to provide a preview of the content, they could use the `/verbose` endpoint to display a relevant snippet or a sample of one, encouraging the user to explore the full item.

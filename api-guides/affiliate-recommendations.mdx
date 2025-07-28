@@ -1,0 +1,105 @@
+# Affiliate Recommendations API Guide
+
+A developer's guide to discovering relevant content from a network of licensed publishers.
+
+## What is the Affiliate Recommendations API?
+
+Similar to Search, the Affiliate Recommendations endpoint provides intelligent content discovery by searching through a comprehensive database of licensed, published materials to find items that are semantically related to a user's query. Specifically, it returns items based on the number of **snippets** found that are associated with that item.
+
+- **Snippets**: A snippet is a section of a content item (like a podcast episode, article, or book) that represents a meaningful piece of information our AI tools can search and understand. They are the recorded units of searchable content in our backend systems.
+
+- **Ranking Logic**: Items are ranked first by the number of relevant snippets found. If two or more items have the same snippet count, they are then ranked by their **cumulative certainty**.
+
+- **Certainty Score**: This is a confidence metric indicating how well a snippet matches the user's query. Higher scores mean stronger relevance. Cumulative certainty is the sum of these individual scores, providing an overall confidence measure for the item's relevance.
+
+To protect intellectual property, the snippets themselves are not visible in the API response.
+
+For example, for the query, "How do I raise kids as a new parent?", if a book has 10 relevant snippets, an article has 8, and a podcast has 6, the API ranks them in that order: book (10), article (8), podcast (6).
+
+## Why use Affiliate Recommendations?
+
+This API enables applications to surface contextually relevant content recommendations that enhance user engagement and discovery. It's perfect for providing "additional resources" or "recommended reading" based on a user's questions or interests. If a publisher filters on their own data, it also enables more exposure to their own content.
+
+## How to Use the API
+
+### Parameters
+
+| Parameter                   | Description                                                                                         | Required |
+| --------------------------- | --------------------------------------------------------------------------------------------------- | -------- |
+| `query`                     | The prompt that the user enters into the application.                                               | **Yes** |
+| `max_snippet_count_overall` | The maximum number of snippets to search through overall.                                           | No       |
+| `media_types`               | An array of media types to filter by (`audio`, `video`, `book`, `article`).                         | No       |
+| `publishers`                | An array of publisher names whose items should be recommended.                                      | No       |
+| `min_snippet_count_per_item`| The minimum number of snippets an item must have to be returned. Must be at least 1.                 | No       |
+
+### Making a Request
+
+An API key is necessary to call this endpoint. You can get one by visiting the **API Credentials** page to generate a token using the OAuth2 Client Credentials flow.
+
+The endpoint for this API is:
+`POST https://platform.ai.gloo.com/ai/v1/data/affiliates/referenced-items`
+
+#### Example Request
+
+```bash
+curl -X 'POST' \
+  '[https://platform.ai.gloo.com/ai/v1/data/affiliates/referenced-items](https://platform.ai.gloo.com/ai/v1/data/affiliates/referenced-items)' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer ${ACCESS_TOKEN}' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "max_snippet_count_overall": 300,
+  "media_types": ["article", "book"],
+  "min_snippet_count_per_item": 2,
+  "publishers": [],
+  "query":"Why do I do what I hate?"
+}'
+```
+
+### Understanding the Response
+
+The response is an array of item objects, sorted by relevance.
+
+#### Example Response
+
+```json
+[
+  {
+    "item_id": "961a22cc-4e4f-49de-ac0e-ab6d6274f7b4",
+    "author": [],
+    "filename": "LivingABadLife.txt",
+    "denomination": "",
+    "duration": "",
+    "item_title": "",
+    "item_subtitle": "",
+    "item_image": "",
+    "item_url": "",
+    "item_tags": "",
+    "h2_id": "",
+    "h2_title": "",
+    "h2_subtitle": "",
+    "h2_image": "",
+    "h2_url": "",
+    "h2_tags": null,
+    "h3_id": "",
+    "h3_title": "",
+    "h3_subtitle": "",
+    "h3_image": "",
+    "h3_url": "",
+    "h3_tags": null,
+    "h2_summary": "",
+    "publication_date": "",
+    "publisher": "Santiago Speaks Secondarily",
+    "publisher_id": "aabe1584-5fec-49e2-8fb1-165398bc5753",
+    "publisher_url": "s.com",
+    "publisher_logo": "[https://dapologeticsimages.s3.us-east-1.amazonaws.com/logos/logo_1746801634876.png](https://dapologeticsimages.s3.us-east-1.amazonaws.com/logos/logo_1746801634876.png)",
+    "summary": "",
+    "type": "article",
+    "hosted_url": "",
+    "snippet_count": 5,
+    "cumulative_certainty": 2.913913071155548
+  }
+]
+```
+
+From this result, we can see that 5 snippets were found for this item, and the sum of their certainty scores was approximately 2.91.

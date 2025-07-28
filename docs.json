@@ -59,7 +59,14 @@
             "pages": [
               "api-guides/overview",
               "api-guides/ingestion",
-              "api-guides/search",
+              {
+                "group": "Search and Recommendations",
+                "pages": [
+                  "api-guides/search",
+                  "api-guides/item-recommendations",
+                  "api-guides/affiliate-recommendations"
+                ]
+              },
               "api-guides/supported-models",
               "api-guides/completions",
               "api-guides/tool-use",
