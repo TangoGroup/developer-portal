@@ -1694,6 +1694,307 @@
           }
         ]
       }
+    },
+    "/ai/v1/data/affiliates/referenced-items": {
+      "post": {
+        "tags": ["data"],
+        "summary": "Get Referenced Items for Affiliates",
+        "description": "Retrieves a list of recommended items based on a user query, designed for affiliate use cases. Allows filtering by media type, publisher, and snippet counts.",
+        "operationId": "get-affiliate-referenced-items",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Parameters for retrieving affiliate recommendations.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AffiliatesRequestBody"
+              },
+              "example": {
+                "max_snippet_count_overall": 300,
+                "media_types": ["article", "book"],
+                "min_snippet_count_per_item": 2,
+                "publishers": [],
+                "query": "Why do I do what I hate?"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response returning a list of referenced items.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AffiliatesItem"
+                  }
+                },
+                "example": [
+                  {
+                    "item_id": "961a22cc-4e4f-49de-ac0e-ab6d6274f7b4",
+                    "author": [],
+                    "filename": "LivingABadLife.txt",
+                    "denomination": "",
+                    "duration": "",
+                    "item_title": "",
+                    "item_subtitle": "",
+                    "item_image": "",
+                    "item_url": "",
+                    "item_tags": "",
+                    "h2_id": "",
+                    "h2_title": "",
+                    "h2_subtitle": "",
+                    "h2_image": "",
+                    "h2_url": "",
+                    "h2_tags": null,
+                    "h3_id": "",
+                    "h3_title": "",
+                    "h3_subtitle": "",
+                    "h3_image": "",
+                    "h3_url": "",
+                    "h3_tags": null,
+                    "h2_summary": "",
+                    "publication_date": "",
+                    "publisher": "Santiago Speaks Secondarily",
+                    "publisher_id": "aabe1584-5fec-49e2-8fb1-165398bc5753",
+                    "publisher_url": "s.com",
+                    "publisher_logo": "<https://dapologeticsimages.s3.us-east-1.amazonaws.com/logos/logo_1746801634876.png>",
+                    "summary": "",
+                    "type": "article",
+                    "hosted_url": "",
+                    "snippet_count": 5,
+                    "cumulative_certainty": 2.913913071155548
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - The JWT token is missing or invalid."
+          },
+          "422": {
+            "description": "Validation Error - The request body is invalid."
+          }
+        }
+      }
+    },
+    "/ai/v1/data/items/recommendations/base": {
+      "post": {
+        "tags": ["data"],
+        "summary": "Get Base Item Recommendations",
+        "description": "Retrieves item recommendations with basic snippet metadata (excluding full snippet text). Requires specifying a collection and tenant for the search.",
+        "operationId": "get-base-item-recommendations",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Parameters for retrieving base item recommendations.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemsRequestBody"
+              },
+              "example": {
+                "collection": "DataEngineDev",
+                "max_snippet_count_overall": 10,
+                "media_types": [],
+                "min_snippet_count_per_item": 1,
+                "publishers": ["Test New Tenant"],
+                "query": "Plans God has for me",
+                "tenant": "TestNewTenant"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response returning a list of items with basic snippet metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ItemsRecommendationsResponseItemBase"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - The request was improperly formatted or contained invalid parameters (e.g., invalid collection or tenant configuration).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Invalid Collection": {
+                    "value": {
+                      "detail": "Invalid Collection, see /ai/v1/data/collection/names"
+                    }
+                  },
+                  "Missing Tenant": {
+                    "value": {
+                      "detail": "Unable to search multi-tenant collection. Provide a tenant, see /ai/v1/data/tenant/names"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - The JWT token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "detail": "Unauthorized"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error - The request body fails validation (e.g., missing required fields).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - An error occurred while searching for sources.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "detail": "Error searching sources. Our team has been notified."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ai/v1/data/items/recommendations/verbose": {
+      "post": {
+        "tags": ["data"],
+        "summary": "Get Verbose Item Recommendations",
+        "description": "Retrieves item recommendations with detailed snippet metadata, including the full snippet text. Requires specifying a collection and tenant for the search.",
+        "operationId": "get-verbose-item-recommendations",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Parameters for retrieving verbose item recommendations.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemsRequestBody"
+              },
+              "example": {
+                "collection": "DataEngineDev",
+                "max_snippet_count_overall": 10,
+                "media_types": [],
+                "min_snippet_count_per_item": 1,
+                "publishers": ["Test New Tenant"],
+                "query": "Plans God has for me",
+                "tenant": "TestNewTenant"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response returning a list of items with full snippet text.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ItemsRecommendationsResponseItemVerbose"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - The request was improperly formatted or contained invalid parameters (e.g., invalid collection or tenant configuration).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Invalid Collection": {
+                    "value": {
+                      "detail": "Invalid Collection, see /ai/v1/data/collection/names"
+                    }
+                  },
+                  "Missing Tenant": {
+                    "value": {
+                      "detail": "Unable to search multi-tenant collection. Provide a tenant, see /ai/v1/data/tenant/names"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - The JWT token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "detail": "Unauthorized"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error - The request body fails validation (e.g., missing required fields).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - An error occurred while searching for sources.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "detail": "Error searching sources. Our team has been notified."
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2579,6 +2880,188 @@
           "h3_summary": {
             "type": "string",
             "description": "Summary for level 3 heading/section."
+          }
+        }
+      },
+      "AffiliatesRequestBody": {
+        "type": "object",
+        "title": "AffiliatesRequestBody",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The prompt that the user enters into the application."
+          },
+          "max_snippet_count_overall": {
+            "type": "integer",
+            "description": "The maximum number of snippets to search through overall.",
+            "default": 300
+          },
+          "media_types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["audio", "video", "book", "article"]
+            },
+            "description": "The type(s) of media for the items returned.",
+            "default": []
+          },
+          "min_snippet_count_per_item": {
+            "type": "integer",
+            "description": "The minimum number of snippets that must be associated with an item for it to be returned.",
+            "minimum": 1,
+            "default": 1
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The publisher(s) whose items should be recommended.",
+            "default": []
+          }
+        },
+        "required": ["query"]
+      },
+      "AffiliatesItem": {
+        "type": "object",
+        "title": "AffiliatesItem",
+        "properties": {
+          "item_id": { "type": "string", "format": "uuid" },
+          "author": { "type": "array", "items": { "type": "string" } },
+          "filename": { "type": "string" },
+          "denomination": { "type": "string" },
+          "duration": { "type": "string" },
+          "item_title": { "type": "string" },
+          "item_subtitle": { "type": "string" },
+          "item_image": { "type": "string", "format": "uri" },
+          "item_url": { "type": "string", "format": "uri" },
+          "item_tags": { "type": "string" },
+          "h2_id": { "type": "string" },
+          "h2_title": { "type": "string" },
+          "h2_subtitle": { "type": "string" },
+          "h2_image": { "type": "string", "format": "uri" },
+          "h2_url": { "type": "string", "format": "uri" },
+          "h2_tags": { "type": "string", "nullable": true },
+          "h3_id": { "type": "string" },
+          "h3_title": { "type": "string" },
+          "h3_subtitle": { "type": "string" },
+          "h3_image": { "type": "string", "format": "uri" },
+          "h3_url": { "type": "string", "format": "uri" },
+          "h3_tags": { "type": "string", "nullable": true },
+          "h2_summary": { "type": "string" },
+          "publication_date": { "type": "string" },
+          "publisher": { "type": "string" },
+          "publisher_id": { "type": "string", "format": "uuid" },
+          "publisher_url": { "type": "string", "format": "uri" },
+          "publisher_logo": { "type": "string", "format": "uri" },
+          "summary": { "type": "string" },
+          "type": { "type": "string" },
+          "hosted_url": { "type": "string", "format": "uri" },
+          "snippet_count": { "type": "integer" },
+          "cumulative_certainty": { "type": "number", "format": "float" }
+        }
+      },
+      "ItemsRequestBody": {
+        "type": "object",
+        "title": "ItemsRequestBody",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The prompt that the user enters into the application."
+          },
+          "collection": {
+            "type": "string",
+            "description": "The collection to search in."
+          },
+          "tenant": {
+            "type": "string",
+            "description": "The tenant to search."
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of Publisher Names. Only publishers belonging to your organization are allowed."
+          },
+          "max_snippet_count_overall": {
+            "type": "integer",
+            "description": "The maximum number of snippets to search through overall."
+          },
+          "min_snippet_count_per_item": {
+            "type": "integer",
+            "description": "The minimum number of snippets for an item to be returned.",
+            "minimum": 1,
+            "default": 1
+          },
+          "media_types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["audio", "video", "book", "article"]
+            },
+            "description": "The type(s) of media for the items returned.",
+            "default": []
+          }
+        },
+        "required": [
+          "query",
+          "collection",
+          "tenant",
+          "publishers",
+          "max_snippet_count_overall"
+        ]
+      },
+      "ItemsRecommendationsResponseItemBase": {
+        "type": "object",
+        "title": "ItemsRecommendationsResponseItemBase",
+        "allOf": [{ "$ref": "#/components/schemas/AffiliatesItem" }],
+        "properties": {
+          "uuids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemRecommendationUuidBase"
+            }
+          }
+        }
+      },
+      "ItemsRecommendationsResponseItemVerbose": {
+        "type": "object",
+        "title": "ItemsRecommendationsResponseItemVerbose",
+        "allOf": [{ "$ref": "#/components/schemas/AffiliatesItem" }],
+        "properties": {
+          "uuids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemRecommendationUuidVerbose"
+            }
+          }
+        }
+      },
+      "ItemRecommendationUuidBase": {
+        "type": "object",
+        "title": "ItemRecommendationUuidBase",
+        "properties": {
+          "uuid": { "type": "string" },
+          "ai_title": { "type": "string" },
+          "ai_subtitle": { "type": "string" },
+          "summary": { "type": "string" },
+          "time_start": { "type": "string" },
+          "time_end": { "type": "string" },
+          "part": { "type": "integer" },
+          "certainty": { "type": "number", "format": "float" }
+        }
+      },
+      "ItemRecommendationUuidVerbose": {
+        "type": "object",
+        "title": "ItemRecommendationUuidVerbose",
+        "allOf": [
+          { "$ref": "#/components/schemas/ItemRecommendationUuidBase" }
+        ],
+        "properties": {
+          "snippet": {
+            "type": "string",
+            "description": "The full text of the snippet."
           }
         }
       },

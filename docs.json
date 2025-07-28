@@ -128,6 +128,9 @@
               "api-reference/core/search",
               "api-reference/data/search-publisher-data",
               "api-reference/data/retrieve-sources",
+              "api-reference/data/get-affiliate-referenced-items",
+              "api-reference/data/get-base-item-recommendations",
+              "api-reference/data/get-verbose-item-recommendations",
               "api-reference/core/extract-intent-from-query",
               "api-reference/core/generate",
               "api-reference/answers/generate-response-answer-stream",
@@ -147,7 +150,12 @@
       },
       {
         "tab": "Tutorials",
-        "pages": ["tutorials/overview", "tutorials/authentication", "tutorials/completions", "tutorials/chat"]
+        "pages": [
+          "tutorials/overview",
+          "tutorials/authentication",
+          "tutorials/completions",
+          "tutorials/chat"
+        ]
       },
       {
         "tab": "Best Practices",
