@@ -51,7 +51,7 @@ Once you have your tenant name, you're ready to query the search endpoint. You c
 curl 'https://platform.ai.gloo.com/ai/v1/kallm/search' -v \
   -H 'Content-Type: application/json' \
   -H "Authorization: Bearer ${ACCESS_TOKEN}" \
-  -d '{"search":"How can I become a better parent?","collection":"DataEngineProd","tenant": "TestOrg", "limit":1}'
+  -d '{"search":"How can I become a better parent?","collection":"GlooProd","tenant": "TestOrg", "limit":1}'
 ```
 
 Example Response
@@ -372,7 +372,7 @@ The result should look something like this:
       },
       "references": null,
       "vector": {},
-      "collection": "DataEngineProd"
+      "collection": "GlooProd"
     }
   ],
   "intent": 1
