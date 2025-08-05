@@ -27,6 +27,7 @@ This API enables applications to surface contextually relevant content recommend
 | Parameter                   | Description                                                                                         | Required |
 | --------------------------- | --------------------------------------------------------------------------------------------------- | -------- |
 | `query`                     | The prompt that the user enters into the application.                                               | **Yes** |
+| `certainty_threshold`               | The minimum certainty threshold for snippets.                         | No       |
 | `max_snippet_count_overall` | The maximum number of snippets to search through overall.                                           | No       |
 | `media_types`               | An array of media types to filter by (`audio`, `video`, `book`, `article`).                         | No       |
 | `publishers`                | An array of publisher names whose items should be recommended.                                      | No       |
@@ -34,7 +35,16 @@ This API enables applications to surface contextually relevant content recommend
 
 ### Making a Request
 
-An API key is necessary to call this endpoint. You can get one by visiting the **API Credentials** page to generate a token using the OAuth2 Client Credentials flow.
+Before making a request, you must know which publisher's content you would like to query.
+
+1.  **Find Your Tenant (Publisher Name):** First, navigate to the [Organizations page](/studio/manage-organizations) in Studio and click "View Publishers". Your **Tenant** is the name of the publisher you're querying.
+2.  **Identify the Collection:** A collection is where we keep the content for our customers. The only collection you'll need to specify in requests is `GlooProd`. You must specify this in the `collection` field.
+
+<Info>
+**NOTE:** You will only have access to your own publisher's tenant through this endpoint, and a tenant must be specified. Other requests will result in a 403 "Forbidden" response.
+</Info>
+
+An API key is necessary to call these endpoints. You can get one by visiting the **API Credentials** page to generate a token using the OAuth2 Client Credentials flow.
 
 The endpoint for this API is:
 `POST https://platform.ai.gloo.com/ai/v1/data/affiliates/referenced-items`
@@ -52,7 +62,8 @@ curl -X 'POST' \
   "media_types": ["article", "book"],
   "min_snippet_count_per_item": 2,
   "publishers": [],
-  "query":"Why do I do what I hate?"
+  "query":"Why do I do what I hate?",
+  "certainty_threshold": 0.3
 }'
 ```
 
