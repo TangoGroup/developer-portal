@@ -63,8 +63,8 @@
                 "group": "Search and Recommendations",
                 "pages": [
                   "api-guides/search",
-                  "api-guides/item-recommendations",
-                  "api-guides/affiliate-recommendations"
+                  "api-guides/affiliate-recommendations",
+                  "api-guides/item-recommendations"
                 ]
               },
               "api-guides/supported-models",

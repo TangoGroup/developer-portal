@@ -1715,11 +1715,11 @@
                 "$ref": "#/components/schemas/AffiliatesRequestBody"
               },
               "example": {
-                "max_snippet_count_overall": 300,
+                "max_snippet_count_overall": 100,
                 "media_types": ["article", "book"],
                 "min_snippet_count_per_item": 2,
                 "publishers": [],
-                "query": "Why do I do what I hate?",
+                "query": "How do I have a good marriage?",
                 "certainty_threshold": 0.3
               }
             }
@@ -1738,39 +1738,39 @@
                 },
                 "example": [
                   {
-                    "item_id": "961a22cc-4e4f-49de-ac0e-ab6d6274f7b4",
-                    "author": [],
-                    "filename": "LivingABadLife.txt",
+                    "item_id": "236ca8b8-0ef3-4c5b-b1a4-1091aa43abdd",
+                    "author": ["Dr. Michael Youssef"],
+                    "filename": "3-ways-to-strengthen-your-marriage.txt",
                     "denomination": "",
                     "duration": "",
-                    "item_title": "",
+                    "item_title": "3 Ways to Strengthen Your Marriage",
                     "item_subtitle": "",
-                    "item_image": "",
-                    "item_url": "",
+                    "item_image": "https://ltw.org/wp-content/uploads/2024/12/3WaysStrengthenMarriageFeb2024MYJ_2000x833.png",
+                    "item_url": "https://ltw.org/read/article/3-ways-to-strengthen-your-marriage/",
                     "item_tags": "",
-                    "h2_id": "",
-                    "h2_title": "",
+                    "h2_id": "6891cf39-c61a-4e9d-a548-77e57a5f47cc",
+                    "h2_title": "MY Journal",
                     "h2_subtitle": "",
                     "h2_image": "",
                     "h2_url": "",
                     "h2_tags": null,
-                    "h3_id": "",
-                    "h3_title": "",
+                    "h3_id": "c0122b21-26a2-4663-b23e-780f131cf1f9",
+                    "h3_title": "Marriage",
                     "h3_subtitle": "",
                     "h3_image": "",
                     "h3_url": "",
                     "h3_tags": null,
                     "h2_summary": "",
-                    "publication_date": "",
-                    "publisher": "Santiago Speaks Secondarily",
-                    "publisher_id": "aabe1584-5fec-49e2-8fb1-165398bc5753",
-                    "publisher_url": "s.com",
-                    "publisher_logo": "<https://dapologeticsimages.s3.us-east-1.amazonaws.com/logos/logo_1746801634876.png>",
+                    "publication_date": "February 1, 2024",
+                    "publisher": "Leading the Way",
+                    "publisher_id": "a6e849de-4972-4fc5-b5f6-6a239ed577c5",
+                    "publisher_url": "LeadingTheWay",
+                    "publisher_logo": "https://dapologeticsimages.s3.us-east-1.amazonaws.com/logos/logo_1743136797058.svg",
                     "summary": "",
-                    "type": "article",
-                    "hosted_url": "",
-                    "snippet_count": 5,
-                    "cumulative_certainty": 2.913913071155548
+                    "type": "Article",
+                    "hosted_url": "https://ltw.org/read/article/3-ways-to-strengthen-your-marriage/",
+                    "snippet_count": 2,
+                    "cumulative_certainty": 1.44311040639877
                   }
                 ]
               }
@@ -1780,7 +1780,73 @@
             "description": "Unauthorized - The JWT token is missing or invalid."
           },
           "422": {
-            "description": "Validation Error - The request body is invalid."
+            "description": "Validation Error - The request body is invalid, missing required fields, or contains invalid values.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                },
+                "examples": {
+                  "InvalidRequestBody": {
+                    "summary": "Error: Invalid Request Body",
+                    "value": {
+                      "detail": [
+                        {
+                          "loc": ["body"],
+                          "msg": "Input should be a valid JSON object",
+                          "type": "json_invalid"
+                        }
+                      ]
+                    }
+                  },
+                  "MissingRequiredFields": {
+                    "summary": "Error: Missing Required Fields",
+                    "value": {
+                      "detail": [
+                        {
+                          "loc": ["body", "query"],
+                          "msg": "Field required",
+                          "type": "missing"
+                        },
+                        {
+                          "loc": ["body", "collection"],
+                          "msg": "Field required",
+                          "type": "missing"
+                        }
+                      ]
+                    }
+                  },
+                  "InvalidFieldValues": {
+                    "summary": "Error: Invalid Field Values",
+                    "value": {
+                      "detail": [
+                        {
+                          "loc": ["body", "min_snippet_count_per_item"],
+                          "msg": "Input should be greater than or equal to 1",
+                          "type": "greater_than_equal",
+                          "ctx": {
+                            "ge": 1
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - An error occurred while searching for sources.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "detail": "Error searching sources. Our team has been notified."
+                }
+              }
+            }
           }
         }
       }
@@ -1840,13 +1906,27 @@
                 },
                 "examples": {
                   "Invalid Collection": {
+                    "summary": "Error: Invalid Collection",
                     "value": {
-                      "detail": "Invalid Collection, see /ai/v1/data/collection/names"
+                      "detail": "Invalid Collection. Please see https://docs.gloo.com/api-guides/search#making-requests for information on providing a valid collection."
                     }
                   },
-                  "Missing Tenant": {
+                  "Missing Tenant for Multi-Tenant Collection": {
+                    "summary": "Error: Missing Tenant",
                     "value": {
-                      "detail": "Unable to search multi-tenant collection. Provide a tenant, see /ai/v1/data/tenant/names"
+                      "detail": "Unable to search multi-tenant collection, {collection}. Please provide a valid tenant. See https://docs.gloo.com/api-guides/search#making-requests for information on providing a valid tenant."
+                    }
+                  },
+                  "Tenant in Non-Multi-Tenant Collection": {
+                    "summary": "Error: Invalid Tenant for Collection",
+                    "value": {
+                      "detail": "Unable to search tenant, {tenant}, in non-multi-tenant collection, {collection}. Provide a multi-tenant collection, or remove tenant. See /ai/v1/data/collection/names?multi_tenancy=true"
+                    }
+                  },
+                  "Invalid Tenant for Collection": {
+                    "summary": "Error: Invalid Tenant for Given Collection",
+                    "value": {
+                      "detail": "Unable to search tenant, {request_body.tenant}, in collection, {request_body.collection}. Please provide a valid tenant. See https://docs.gloo.com/api-guides/search#making-requests for information on providing a valid tenant."
                     }
                   }
                 }
@@ -1947,13 +2027,27 @@
                 },
                 "examples": {
                   "Invalid Collection": {
+                    "summary": "Error: Invalid Collection",
                     "value": {
-                      "detail": "Invalid Collection, see /ai/v1/data/collection/names"
+                      "detail": "Invalid Collection. Please see https://docs.gloo.com/api-guides/search#making-requests for information on providing a valid collection."
                     }
                   },
-                  "Missing Tenant": {
+                  "Missing Tenant for Multi-Tenant Collection": {
+                    "summary": "Error: Missing Tenant",
                     "value": {
-                      "detail": "Unable to search multi-tenant collection. Provide a tenant, see /ai/v1/data/tenant/names"
+                      "detail": "Unable to search multi-tenant collection, {collection}. Please provide a valid tenant. See https://docs.gloo.com/api-guides/search#making-requests for information on providing a valid tenant."
+                    }
+                  },
+                  "Tenant in Non-Multi-Tenant Collection": {
+                    "summary": "Error: Invalid Tenant for Collection",
+                    "value": {
+                      "detail": "Unable to search tenant, {tenant}, in non-multi-tenant collection, {collection}. Provide a multi-tenant collection, or remove tenant. See /ai/v1/data/collection/names?multi_tenancy=true"
+                    }
+                  },
+                  "Invalid Tenant for Collection": {
+                    "summary": "Error: Invalid Tenant for Given Collection",
+                    "value": {
+                      "detail": "Unable to search tenant, {request_body.tenant}, in collection, {request_body.collection}. Please provide a valid tenant. See https://docs.gloo.com/api-guides/search#making-requests for information on providing a valid tenant."
                     }
                   }
                 }

@@ -1,8 +1,9 @@
-# Affiliate Recommendations API Guide
+---
+title: 'Affiliate Recommendations'
+description: 'Guide to discovering relevant content from a network of licensed publishers'
+---
 
-A developer's guide to discovering relevant content from a network of licensed publishers.
-
-## What is the Affiliate Recommendations API?
+## Overview
 
 Similar to Search, the Affiliate Recommendations endpoint provides intelligent content discovery by searching through a comprehensive database of licensed, published materials to find items that are semantically related to a user's query. Specifically, it returns items based on the number of **snippets** found that are associated with that item.
 
@@ -35,34 +36,24 @@ This API enables applications to surface contextually relevant content recommend
 
 ### Making a Request
 
-Before making a request, you must know which publisher's content you would like to query.
-
-1.  **Find Your Tenant (Publisher Name):** First, navigate to the [Organizations page](/studio/manage-organizations) in Studio and click "View Publishers". Your **Tenant** is the name of the publisher you're querying.
-2.  **Identify the Collection:** A collection is where we keep the content for our customers. The only collection you'll need to specify in requests is `GlooProd`. You must specify this in the `collection` field.
-
-<Info>
-**NOTE:** You will only have access to your own publisher's tenant through this endpoint, and a tenant must be specified. Other requests will result in a 403 "Forbidden" response.
-</Info>
-
 An API key is necessary to call these endpoints. You can get one by visiting the **API Credentials** page to generate a token using the OAuth2 Client Credentials flow.
 
-The endpoint for this API is:
-`POST https://platform.ai.gloo.com/ai/v1/data/affiliates/referenced-items`
+Endpoint: `POST /ai/v1/data/affiliates/referenced-items`
 
 #### Example Request
 
 ```bash
 curl -X 'POST' \
-  '[https://platform.ai.gloo.com/ai/v1/data/affiliates/referenced-items](https://platform.ai.gloo.com/ai/v1/data/affiliates/referenced-items)' \
+  'https://platform.ai.gloo.com/ai/v1/data/affiliates/referenced-items' \
   -H 'accept: application/json' \
   -H 'Authorization: Bearer ${ACCESS_TOKEN}' \
   -H 'Content-Type: application/json' \
   -d '{
-  "max_snippet_count_overall": 300,
+  "max_snippet_count_overall": 100,
   "media_types": ["article", "book"],
   "min_snippet_count_per_item": 2,
   "publishers": [],
-  "query":"Why do I do what I hate?",
+  "query":"How do I have a good marriage?",
   "certainty_threshold": 0.3
 }'
 ```
@@ -76,41 +67,43 @@ The response is an array of item objects, sorted by relevance.
 ```json
 [
   {
-    "item_id": "961a22cc-4e4f-49de-ac0e-ab6d6274f7b4",
-    "author": [],
-    "filename": "LivingABadLife.txt",
+    "item_id": "236ca8b8-0ef3-4c5b-b1a4-1091aa43abdd",
+    "author": [
+      "Dr. Michael Youssef"
+    ],
+    "filename": "3-ways-to-strengthen-your-marriage.txt",
     "denomination": "",
     "duration": "",
-    "item_title": "",
+    "item_title": "3 Ways to Strengthen Your Marriage",
     "item_subtitle": "",
-    "item_image": "",
-    "item_url": "",
+    "item_image": "https://ltw.org/wp-content/uploads/2024/12/3WaysStrengthenMarriageFeb2024MYJ_2000x833.png",
+    "item_url": "https://ltw.org/read/article/3-ways-to-strengthen-your-marriage/",
     "item_tags": "",
-    "h2_id": "",
-    "h2_title": "",
+    "h2_id": "6891cf39-c61a-4e9d-a548-77e57a5f47cc",
+    "h2_title": "MY Journal",
     "h2_subtitle": "",
     "h2_image": "",
     "h2_url": "",
     "h2_tags": null,
-    "h3_id": "",
-    "h3_title": "",
+    "h3_id": "c0122b21-26a2-4663-b23e-780f131cf1f9",
+    "h3_title": "Marriage",
     "h3_subtitle": "",
     "h3_image": "",
     "h3_url": "",
     "h3_tags": null,
     "h2_summary": "",
-    "publication_date": "",
-    "publisher": "Santiago Speaks Secondarily",
-    "publisher_id": "aabe1584-5fec-49e2-8fb1-165398bc5753",
-    "publisher_url": "s.com",
-    "publisher_logo": "[https://dapologeticsimages.s3.us-east-1.amazonaws.com/logos/logo_1746801634876.png](https://dapologeticsimages.s3.us-east-1.amazonaws.com/logos/logo_1746801634876.png)",
+    "publication_date": "February 1, 2024",
+    "publisher": "Leading the Way",
+    "publisher_id": "a6e849de-4972-4fc5-b5f6-6a239ed577c5",
+    "publisher_url": "LeadingTheWay",
+    "publisher_logo": "https://dapologeticsimages.s3.us-east-1.amazonaws.com/logos/logo_1743136797058.svg",
     "summary": "",
-    "type": "article",
-    "hosted_url": "",
-    "snippet_count": 5,
-    "cumulative_certainty": 2.913913071155548
+    "type": "Article",
+    "hosted_url": "https://ltw.org/read/article/3-ways-to-strengthen-your-marriage/",
+    "snippet_count": 2,
+    "cumulative_certainty": 1.44311040639877
   }
 ]
 ```
 
-From this result, we can see that 5 snippets were found for this item, and the sum of their certainty scores was approximately 2.91.
+The result shows the number of snippetes returned, one in this example and a sum of the certainty score, which is about 1.4.

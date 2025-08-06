@@ -1,10 +1,11 @@
-# Item Recommendations API Guide
+---
+title: 'Item Recommendations'
+description: 'Guide to surfacing relevant content from your organization’s own data'
+---
 
-A developer's guide to surfacing relevant content from your organization's own data.
+# Overview
 
-## What is the Item Recommendations API?
-
-The Item Recommendations endpoints provide similar functionality to the [Affiliate Recommendations API](/api-guides/search-and-recommendations/affiliate-recommendations), but with a key difference: **it only returns items that your organization has access to.** This protects intellectual property while enabling powerful content discovery features for your users.
+The Item Recommendations endpoints provide similar functionality to the [Affiliate Recommendations API](/api-guides/affiliate-recommendations), but with a key difference: **it only returns items that your organization has access to.** This protects intellectual property while enabling powerful content discovery features for your users.
 
 The search and ranking logic, based on snippet count and cumulative certainty, is identical to the Affiliate Recommendations API.
 
@@ -57,7 +58,7 @@ This endpoint returns snippet metadata without the snippet text.
 
 ```bash
 curl -X 'POST' \
-  '[https://platform.ai.gloo.com/ai/v1/data/items/recommendations/base](https://platform.ai.gloo.com/ai/v1/data/items/recommendations/base)' \
+  'https://platform.ai.gloo.com/ai/v1/data/items/recommendations/base' \
   -H 'accept: application/json' \
   -H 'Authorization: Bearer ${ACCESS_TOKEN}' \
   -H 'Content-Type: application/json' \
@@ -113,7 +114,7 @@ This endpoint returns the full snippet text.
 
 ```bash
 curl -X 'POST' \
-  '[https://platform.ai.gloo.com/ai/v1/data/items/recommendations/verbose](https://platform.ai.gloo.com/ai/v1/data/items/recommendations/verbose)' \
+  'https://platform.ai.gloo.com/ai/v1/data/items/recommendations/verbose' \
   -H 'accept: application/json' \
   -H 'Authorization: Bearer ${ACCESS_TOKEN}' \
   -H 'Content-Type: application/json' \
@@ -162,6 +163,6 @@ Note the addition of the `snippet` field in the `uuids` array.
 
 The Item Recommendations API is ideal for a publisher looking to increase exposure and engagement with their own content.
 
-For example, a user could enter a query on a publisher's website. The publisher could then use the `/base` endpoint to recommend their own relevant books, articles, or videos. This enhances content discovery and keeps users engaged on the platform.
+For example, a user could enter a query on a publisher's website. The publisher could then use the `/recommendations/base` endpoint to recommend their own relevant books, articles, or videos. This enhances content discovery and keeps users engaged on the platform.
 
-If the publisher wanted to provide a preview of the content, they could use the `/verbose` endpoint to display a relevant snippet or a sample of one, encouraging the user to explore the full item.
+If the publisher wanted to provide a preview of the content, they could use the `/recommendations/verbose` endpoint to display a relevant snippet or a sample of one, encouraging the user to explore the full item.
