@@ -1,0 +1,109 @@
+---
+title: 'Affiliate Recommendations'
+description: 'Guide to discovering relevant content from a network of licensed publishers'
+---
+
+## Overview
+
+Similar to Search, the Affiliate Recommendations endpoint provides intelligent content discovery by searching through a comprehensive database of licensed, published materials to find items that are semantically related to a user's query. Specifically, it returns items based on the number of **snippets** found that are associated with that item.
+
+- **Snippets**: A snippet is a section of a content item (like a podcast episode, article, or book) that represents a meaningful piece of information our AI tools can search and understand. They are the recorded units of searchable content in our backend systems.
+
+- **Ranking Logic**: Items are ranked first by the number of relevant snippets found. If two or more items have the same snippet count, they are then ranked by their **cumulative certainty**.
+
+- **Certainty Score**: This is a confidence metric indicating how well a snippet matches the user's query. Higher scores mean stronger relevance. Cumulative certainty is the sum of these individual scores, providing an overall confidence measure for the item's relevance.
+
+To protect intellectual property, the snippets themselves are not visible in the API response.
+
+For example, for the query, "How do I raise kids as a new parent?", if a book has 10 relevant snippets, an article has 8, and a podcast has 6, the API ranks them in that order: book (10), article (8), podcast (6).
+
+## Why use Affiliate Recommendations?
+
+This API enables applications to surface contextually relevant content recommendations that enhance user engagement and discovery. It's perfect for providing "additional resources" or "recommended reading" based on a user's questions or interests. If a publisher filters on their own data, it also enables more exposure to their own content.
+
+## How to Use the API
+
+### Parameters
+
+| Parameter                   | Description                                                                                         | Required |
+| --------------------------- | --------------------------------------------------------------------------------------------------- | -------- |
+| `query`                     | The prompt that the user enters into the application.                                               | **Yes** |
+| `certainty_threshold`               | The minimum certainty threshold for snippets.                         | No       |
+| `max_snippet_count_overall` | The maximum number of snippets to search through overall.                                           | No       |
+| `media_types`               | An array of media types to filter by (`audio`, `video`, `book`, `article`).                         | No       |
+| `publishers`                | An array of publisher names whose items should be recommended.                                      | No       |
+| `min_snippet_count_per_item`| The minimum number of snippets an item must have to be returned. Must be at least 1.                 | No       |
+
+### Making a Request
+
+An API key is necessary to call these endpoints. You can get one by visiting the **API Credentials** page to generate a token using the OAuth2 Client Credentials flow.
+
+Endpoint: `POST /ai/v1/data/affiliates/referenced-items`
+
+#### Example Request
+
+```bash
+curl -X 'POST' \
+  'https://platform.ai.gloo.com/ai/v1/data/affiliates/referenced-items' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer ${ACCESS_TOKEN}' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "max_snippet_count_overall": 100,
+  "media_types": ["article", "book"],
+  "min_snippet_count_per_item": 2,
+  "publishers": [],
+  "query":"How do I have a good marriage?",
+  "certainty_threshold": 0.3
+}'
+```
+
+### Understanding the Response
+
+The response is an array of item objects, sorted by relevance.
+
+#### Example Response
+
+```json
+[
+  {
+    "item_id": "236ca8b8-0ef3-4c5b-b1a4-1091aa43abdd",
+    "author": [
+      "Dr. Michael Youssef"
+    ],
+    "filename": "3-ways-to-strengthen-your-marriage.txt",
+    "denomination": "",
+    "duration": "",
+    "item_title": "3 Ways to Strengthen Your Marriage",
+    "item_subtitle": "",
+    "item_image": "https://ltw.org/wp-content/uploads/2024/12/3WaysStrengthenMarriageFeb2024MYJ_2000x833.png",
+    "item_url": "https://ltw.org/read/article/3-ways-to-strengthen-your-marriage/",
+    "item_tags": "",
+    "h2_id": "6891cf39-c61a-4e9d-a548-77e57a5f47cc",
+    "h2_title": "MY Journal",
+    "h2_subtitle": "",
+    "h2_image": "",
+    "h2_url": "",
+    "h2_tags": null,
+    "h3_id": "c0122b21-26a2-4663-b23e-780f131cf1f9",
+    "h3_title": "Marriage",
+    "h3_subtitle": "",
+    "h3_image": "",
+    "h3_url": "",
+    "h3_tags": null,
+    "h2_summary": "",
+    "publication_date": "February 1, 2024",
+    "publisher": "Leading the Way",
+    "publisher_id": "a6e849de-4972-4fc5-b5f6-6a239ed577c5",
+    "publisher_url": "LeadingTheWay",
+    "publisher_logo": "https://dapologeticsimages.s3.us-east-1.amazonaws.com/logos/logo_1743136797058.svg",
+    "summary": "",
+    "type": "Article",
+    "hosted_url": "https://ltw.org/read/article/3-ways-to-strengthen-your-marriage/",
+    "snippet_count": 2,
+    "cumulative_certainty": 1.44311040639877
+  }
+]
+```
+
+The result shows the number of snippetes returned, one in this example and a sum of the certainty score, which is about 1.4.

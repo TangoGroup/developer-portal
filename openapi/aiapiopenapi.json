@@ -1694,6 +1694,404 @@
           }
         ]
       }
+    },
+    "/ai/v1/data/affiliates/referenced-items": {
+      "post": {
+        "tags": ["data"],
+        "summary": "Get Referenced Items for Affiliates",
+        "description": "Retrieves a list of recommended items based on a user query, designed for affiliate use cases. Allows filtering by media type, publisher, and snippet counts.",
+        "operationId": "get-affiliate-referenced-items",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Parameters for retrieving affiliate recommendations.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AffiliatesRequestBody"
+              },
+              "example": {
+                "max_snippet_count_overall": 100,
+                "media_types": ["article", "book"],
+                "min_snippet_count_per_item": 2,
+                "publishers": [],
+                "query": "How do I have a good marriage?",
+                "certainty_threshold": 0.3
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response returning a list of referenced items.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AffiliatesItem"
+                  }
+                },
+                "example": [
+                  {
+                    "item_id": "236ca8b8-0ef3-4c5b-b1a4-1091aa43abdd",
+                    "author": ["Dr. Michael Youssef"],
+                    "filename": "3-ways-to-strengthen-your-marriage.txt",
+                    "denomination": "",
+                    "duration": "",
+                    "item_title": "3 Ways to Strengthen Your Marriage",
+                    "item_subtitle": "",
+                    "item_image": "https://ltw.org/wp-content/uploads/2024/12/3WaysStrengthenMarriageFeb2024MYJ_2000x833.png",
+                    "item_url": "https://ltw.org/read/article/3-ways-to-strengthen-your-marriage/",
+                    "item_tags": "",
+                    "h2_id": "6891cf39-c61a-4e9d-a548-77e57a5f47cc",
+                    "h2_title": "MY Journal",
+                    "h2_subtitle": "",
+                    "h2_image": "",
+                    "h2_url": "",
+                    "h2_tags": null,
+                    "h3_id": "c0122b21-26a2-4663-b23e-780f131cf1f9",
+                    "h3_title": "Marriage",
+                    "h3_subtitle": "",
+                    "h3_image": "",
+                    "h3_url": "",
+                    "h3_tags": null,
+                    "h2_summary": "",
+                    "publication_date": "February 1, 2024",
+                    "publisher": "Leading the Way",
+                    "publisher_id": "a6e849de-4972-4fc5-b5f6-6a239ed577c5",
+                    "publisher_url": "LeadingTheWay",
+                    "publisher_logo": "https://dapologeticsimages.s3.us-east-1.amazonaws.com/logos/logo_1743136797058.svg",
+                    "summary": "",
+                    "type": "Article",
+                    "hosted_url": "https://ltw.org/read/article/3-ways-to-strengthen-your-marriage/",
+                    "snippet_count": 2,
+                    "cumulative_certainty": 1.44311040639877
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - The JWT token is missing or invalid."
+          },
+          "422": {
+            "description": "Validation Error - The request body is invalid, missing required fields, or contains invalid values.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                },
+                "examples": {
+                  "InvalidRequestBody": {
+                    "summary": "Error: Invalid Request Body",
+                    "value": {
+                      "detail": [
+                        {
+                          "loc": ["body"],
+                          "msg": "Input should be a valid JSON object",
+                          "type": "json_invalid"
+                        }
+                      ]
+                    }
+                  },
+                  "MissingRequiredFields": {
+                    "summary": "Error: Missing Required Fields",
+                    "value": {
+                      "detail": [
+                        {
+                          "loc": ["body", "query"],
+                          "msg": "Field required",
+                          "type": "missing"
+                        },
+                        {
+                          "loc": ["body", "collection"],
+                          "msg": "Field required",
+                          "type": "missing"
+                        }
+                      ]
+                    }
+                  },
+                  "InvalidFieldValues": {
+                    "summary": "Error: Invalid Field Values",
+                    "value": {
+                      "detail": [
+                        {
+                          "loc": ["body", "min_snippet_count_per_item"],
+                          "msg": "Input should be greater than or equal to 1",
+                          "type": "greater_than_equal",
+                          "ctx": {
+                            "ge": 1
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - An error occurred while searching for sources.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "detail": "Error searching sources. Our team has been notified."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ai/v1/data/items/recommendations/base": {
+      "post": {
+        "tags": ["data"],
+        "summary": "Get Base Item Recommendations",
+        "description": "Retrieves item recommendations with basic snippet metadata (excluding full snippet text). Requires specifying a collection and tenant for the search.",
+        "operationId": "get-base-item-recommendations",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Parameters for retrieving base item recommendations.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemsRequestBody"
+              },
+              "example": {
+                "collection": "GlooProd",
+                "max_snippet_count_overall": 10,
+                "media_types": [],
+                "min_snippet_count_per_item": 1,
+                "publishers": ["Test New Tenant"],
+                "query": "Plans God has for me",
+                "tenant": "TestNewTenant",
+                "certainty_threshold": 0.5
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response returning a list of items with basic snippet metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ItemsRecommendationsResponseItemBase"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - The request was improperly formatted or contained invalid parameters (e.g., invalid collection or tenant configuration).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Invalid Collection": {
+                    "summary": "Error: Invalid Collection",
+                    "value": {
+                      "detail": "Invalid Collection. Please see https://docs.gloo.com/api-guides/search#making-requests for information on providing a valid collection."
+                    }
+                  },
+                  "Missing Tenant for Multi-Tenant Collection": {
+                    "summary": "Error: Missing Tenant",
+                    "value": {
+                      "detail": "Unable to search multi-tenant collection, {collection}. Please provide a valid tenant. See https://docs.gloo.com/api-guides/search#making-requests for information on providing a valid tenant."
+                    }
+                  },
+                  "Tenant in Non-Multi-Tenant Collection": {
+                    "summary": "Error: Invalid Tenant for Collection",
+                    "value": {
+                      "detail": "Unable to search tenant, {tenant}, in non-multi-tenant collection, {collection}. Provide a multi-tenant collection, or remove tenant. See /ai/v1/data/collection/names?multi_tenancy=true"
+                    }
+                  },
+                  "Invalid Tenant for Collection": {
+                    "summary": "Error: Invalid Tenant for Given Collection",
+                    "value": {
+                      "detail": "Unable to search tenant, {request_body.tenant}, in collection, {request_body.collection}. Please provide a valid tenant. See https://docs.gloo.com/api-guides/search#making-requests for information on providing a valid tenant."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - The JWT token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "detail": "Unauthorized"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error - The request body fails validation (e.g., missing required fields).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - An error occurred while searching for sources.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "detail": "Error searching sources. Our team has been notified."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ai/v1/data/items/recommendations/verbose": {
+      "post": {
+        "tags": ["data"],
+        "summary": "Get Verbose Item Recommendations",
+        "description": "Retrieves item recommendations with detailed snippet metadata, including the full snippet text. Requires specifying a collection and tenant for the search.",
+        "operationId": "get-verbose-item-recommendations",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Parameters for retrieving verbose item recommendations.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemsRequestBody"
+              },
+              "example": {
+                "collection": "GlooProd",
+                "max_snippet_count_overall": 10,
+                "media_types": [],
+                "min_snippet_count_per_item": 1,
+                "publishers": ["Test New Tenant"],
+                "query": "Plans God has for me",
+                "tenant": "TestNewTenant",
+                "certainty_threshold": 0.5
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response returning a list of items with full snippet text.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ItemsRecommendationsResponseItemVerbose"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - The request was improperly formatted or contained invalid parameters (e.g., invalid collection or tenant configuration).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Invalid Collection": {
+                    "summary": "Error: Invalid Collection",
+                    "value": {
+                      "detail": "Invalid Collection. Please see https://docs.gloo.com/api-guides/search#making-requests for information on providing a valid collection."
+                    }
+                  },
+                  "Missing Tenant for Multi-Tenant Collection": {
+                    "summary": "Error: Missing Tenant",
+                    "value": {
+                      "detail": "Unable to search multi-tenant collection, {collection}. Please provide a valid tenant. See https://docs.gloo.com/api-guides/search#making-requests for information on providing a valid tenant."
+                    }
+                  },
+                  "Tenant in Non-Multi-Tenant Collection": {
+                    "summary": "Error: Invalid Tenant for Collection",
+                    "value": {
+                      "detail": "Unable to search tenant, {tenant}, in non-multi-tenant collection, {collection}. Provide a multi-tenant collection, or remove tenant. See /ai/v1/data/collection/names?multi_tenancy=true"
+                    }
+                  },
+                  "Invalid Tenant for Collection": {
+                    "summary": "Error: Invalid Tenant for Given Collection",
+                    "value": {
+                      "detail": "Unable to search tenant, {request_body.tenant}, in collection, {request_body.collection}. Please provide a valid tenant. See https://docs.gloo.com/api-guides/search#making-requests for information on providing a valid tenant."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - The JWT token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "detail": "Unauthorized"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error - The request body fails validation (e.g., missing required fields).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - An error occurred while searching for sources.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "detail": "Error searching sources. Our team has been notified."
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2579,6 +2977,204 @@
           "h3_summary": {
             "type": "string",
             "description": "Summary for level 3 heading/section."
+          }
+        }
+      },
+      "AffiliatesRequestBody": {
+        "type": "object",
+        "title": "AffiliatesRequestBody",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The prompt that the user enters into the application."
+          },
+          "certainty_threshold": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Certainty Threshold",
+            "description": "The minimum certainty threshold for snippets.",
+            "default": 0.75
+          },
+          "max_snippet_count_overall": {
+            "type": "integer",
+            "description": "The maximum number of snippets to search through overall.",
+            "default": 300
+          },
+          "media_types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["audio", "video", "book", "article"]
+            },
+            "description": "The type(s) of media for the items returned.",
+            "default": []
+          },
+          "min_snippet_count_per_item": {
+            "type": "integer",
+            "description": "The minimum number of snippets that must be associated with an item for it to be returned.",
+            "minimum": 1,
+            "default": 1
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The publisher(s) whose items should be recommended.",
+            "default": []
+          }
+        },
+        "required": ["query"]
+      },
+      "AffiliatesItem": {
+        "type": "object",
+        "title": "AffiliatesItem",
+        "properties": {
+          "item_id": { "type": "string", "format": "uuid" },
+          "author": { "type": "array", "items": { "type": "string" } },
+          "filename": { "type": "string" },
+          "denomination": { "type": "string" },
+          "duration": { "type": "string" },
+          "item_title": { "type": "string" },
+          "item_subtitle": { "type": "string" },
+          "item_image": { "type": "string", "format": "uri" },
+          "item_url": { "type": "string", "format": "uri" },
+          "item_tags": { "type": "string" },
+          "h2_id": { "type": "string" },
+          "h2_title": { "type": "string" },
+          "h2_subtitle": { "type": "string" },
+          "h2_image": { "type": "string", "format": "uri" },
+          "h2_url": { "type": "string", "format": "uri" },
+          "h2_tags": { "type": "string", "nullable": true },
+          "h3_id": { "type": "string" },
+          "h3_title": { "type": "string" },
+          "h3_subtitle": { "type": "string" },
+          "h3_image": { "type": "string", "format": "uri" },
+          "h3_url": { "type": "string", "format": "uri" },
+          "h3_tags": { "type": "string", "nullable": true },
+          "h2_summary": { "type": "string" },
+          "publication_date": { "type": "string" },
+          "publisher": { "type": "string" },
+          "publisher_id": { "type": "string", "format": "uuid" },
+          "publisher_url": { "type": "string", "format": "uri" },
+          "publisher_logo": { "type": "string", "format": "uri" },
+          "summary": { "type": "string" },
+          "type": { "type": "string" },
+          "hosted_url": { "type": "string", "format": "uri" },
+          "snippet_count": { "type": "integer" },
+          "cumulative_certainty": { "type": "number", "format": "float" }
+        }
+      },
+      "ItemsRequestBody": {
+        "type": "object",
+        "title": "ItemsRequestBody",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The prompt that the user enters into the application."
+          },
+          "certainty_threshold": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Certainty Threshold",
+            "description": "The minimum certainty threshold for snippets.",
+            "default": 0.75
+          },
+          "collection": {
+            "type": "string",
+            "description": "The collection to search in."
+          },
+          "tenant": {
+            "type": "string",
+            "description": "The tenant to search."
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of Publisher Names. Only publishers belonging to your organization are allowed."
+          },
+          "max_snippet_count_overall": {
+            "type": "integer",
+            "description": "The maximum number of snippets to search through overall."
+          },
+          "min_snippet_count_per_item": {
+            "type": "integer",
+            "description": "The minimum number of snippets for an item to be returned.",
+            "minimum": 1,
+            "default": 1
+          },
+          "media_types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["audio", "video", "book", "article"]
+            },
+            "description": "The type(s) of media for the items returned.",
+            "default": []
+          }
+        },
+        "required": [
+          "query",
+          "collection",
+          "tenant",
+          "publishers",
+          "max_snippet_count_overall"
+        ]
+      },
+      "ItemsRecommendationsResponseItemBase": {
+        "type": "object",
+        "title": "ItemsRecommendationsResponseItemBase",
+        "allOf": [{ "$ref": "#/components/schemas/AffiliatesItem" }],
+        "properties": {
+          "uuids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemRecommendationUuidBase"
+            }
+          }
+        }
+      },
+      "ItemsRecommendationsResponseItemVerbose": {
+        "type": "object",
+        "title": "ItemsRecommendationsResponseItemVerbose",
+        "allOf": [{ "$ref": "#/components/schemas/AffiliatesItem" }],
+        "properties": {
+          "uuids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemRecommendationUuidVerbose"
+            }
+          }
+        }
+      },
+      "ItemRecommendationUuidBase": {
+        "type": "object",
+        "title": "ItemRecommendationUuidBase",
+        "properties": {
+          "uuid": { "type": "string" },
+          "ai_title": { "type": "string" },
+          "ai_subtitle": { "type": "string" },
+          "summary": { "type": "string" },
+          "time_start": { "type": "string" },
+          "time_end": { "type": "string" },
+          "part": { "type": "integer" },
+          "certainty": { "type": "number", "format": "float" }
+        }
+      },
+      "ItemRecommendationUuidVerbose": {
+        "type": "object",
+        "title": "ItemRecommendationUuidVerbose",
+        "allOf": [
+          { "$ref": "#/components/schemas/ItemRecommendationUuidBase" }
+        ],
+        "properties": {
+          "snippet": {
+            "type": "string",
+            "description": "The full text of the snippet."
           }
         }
       },
