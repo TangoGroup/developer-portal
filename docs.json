@@ -161,6 +161,7 @@
           "tutorials/overview",
           "tutorials/authentication",
           "tutorials/completions",
+          "tutorials/completions-tool-use",
           "tutorials/chat"
         ]
       },
