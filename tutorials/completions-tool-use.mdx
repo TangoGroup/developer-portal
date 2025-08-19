@@ -1,5 +1,6 @@
 ---
 title: 'Completions with Tool Use'
+public: true
 description: 'Learn how to extend model capabilities via the Completions API with tool use.'
 ---
 
@@ -615,7 +616,7 @@ $TOKEN_URL = 'https://platform.ai.gloo.com/oauth2/token';
 $API_URL = 'https://platform.ai.gloo.com/ai/v1/chat/completions';
 
 // Validate credentials
-if ($CLIENT_ID === 'YOUR_CLIENT_ID' || $CLIENT_SECRET === 'YOUR_CLIENT_SECRET' || 
+if ($CLIENT_ID === 'YOUR_CLIENT_ID' || $CLIENT_SECRET === 'YOUR_CLIENT_SECRET' ||
     empty($CLIENT_ID) || empty($CLIENT_SECRET)) {
     echo "Error: GLOO_CLIENT_ID and GLOO_CLIENT_SECRET must be set\n";
     echo "Either:\n";
@@ -1059,7 +1060,7 @@ public class Main {
         if (!CompletionsToolUse.validateCredentials()) {
             System.exit(1);
         }
-        
+
         CompletionsToolUse toolUse = new CompletionsToolUse();
         try {
             String userGoal = "I want to grow in my faith.";
@@ -1090,7 +1091,7 @@ class CompletionsToolUse {
     private static final Dotenv dotenv = Dotenv.configure()
             .ignoreIfMissing()
             .load();
-    
+
     private static final String CLIENT_ID = dotenv.get("GLOO_CLIENT_ID", "YOUR_CLIENT_ID");
     private static final String CLIENT_SECRET = dotenv.get("GLOO_CLIENT_SECRET", "YOUR_CLIENT_SECRET");
     private static final String TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token";
@@ -1099,7 +1100,7 @@ class CompletionsToolUse {
     private TokenInfo tokenInfo;
     private final HttpClient httpClient = HttpClient.newHttpClient();
     public final Gson gson = new Gson();
-    
+
     // Validate that credentials are provided
     public static boolean validateCredentials() {
         if ("YOUR_CLIENT_ID".equals(CLIENT_ID) || CLIENT_ID == null || CLIENT_ID.trim().isEmpty() ||
