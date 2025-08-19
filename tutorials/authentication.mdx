@@ -1,5 +1,6 @@
 ---
 title: 'Authentication with Gloo AI'
+public: true
 description: 'Learn how to authenticate with the Gloo AI API using OAuth2 client credentials flow.'
 ---
 
@@ -62,13 +63,13 @@ def get_access_token():
     """Retrieve a new access token from the Gloo AI API."""
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     data = {"grant_type": "client_credentials", "scope": "api/access"}
-    
+
     response = requests.post(TOKEN_URL, headers=headers, data=data, auth=(CLIENT_ID, CLIENT_SECRET))
     response.raise_for_status()
-    
+
     token_data = response.json()
     token_data['expires_at'] = int(time.time()) + token_data['expires_in']
-    
+
     return token_data
 
 # Example usage
@@ -91,10 +92,10 @@ async function getAccessToken() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         auth: { username: CLIENT_ID, password: CLIENT_SECRET }
     });
-    
+
     const tokenData = response.data;
     tokenData.expires_at = Math.floor(Date.now() / 1000) + tokenData.expires_in;
-    
+
     return tokenData;
 }
 
@@ -128,10 +129,10 @@ async function getAccessToken(): Promise<TokenInfo> {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         auth: { username: CLIENT_ID, password: CLIENT_SECRET }
     });
-    
+
     const tokenData = response.data;
     (tokenData as any).expires_at = Math.floor(Date.now() / 1000) + tokenData.expires_in;
-    
+
     return tokenData;
 }
 
@@ -156,23 +157,23 @@ $TOKEN_URL = 'https://platform.ai.gloo.com/oauth2/token';
 function getAccessToken($client_id, $client_secret, $token_url) {
     $post_data = 'grant_type=client_credentials&scope=api/access';
     $ch = curl_init();
-    
+
     curl_setopt($ch, CURLOPT_URL, $token_url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
     curl_setopt($ch, CURLOPT_USERPWD, $client_id . ':' . $client_secret);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
-    
+
     $result = curl_exec($ch);
     if (curl_errno($ch)) {
         throw new Exception(curl_error($ch));
     }
     curl_close($ch);
-    
+
     $token_data = json_decode($result, true);
     $token_data['expires_at'] = time() + $token_data['expires_in'];
-    
+
     return $token_data;
 }
 
@@ -259,7 +260,7 @@ func main() {
 		fmt.Printf("Error: %v\n", err)
 		return
 	}
-	
+
 	fmt.Printf("Access token: %s\n", tokenInfo.AccessToken)
 	fmt.Printf("Expires in: %d seconds\n", tokenInfo.ExpiresIn)
 }
@@ -279,41 +280,41 @@ public class AuthManager {
     private static final String CLIENT_ID = System.getenv().getOrDefault("GLOO_CLIENT_ID", "YOUR_CLIENT_ID");
     private static final String CLIENT_SECRET = System.getenv().getOrDefault("GLOO_CLIENT_SECRET", "YOUR_CLIENT_SECRET");
     private static final String TOKEN_URL = "https://platform.ai.gloo.com/oauth2/token";
-    
+
     private static final HttpClient httpClient = HttpClient.newHttpClient();
     private static final Gson gson = new Gson();
-    
+
     public static class TokenInfo {
         public String access_token;
         public int expires_in;
         public long expires_at;
         public String token_type;
     }
-    
+
     public static TokenInfo getAccessToken() throws IOException, InterruptedException {
         String auth = CLIENT_ID + ":" + CLIENT_SECRET;
         String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
         String requestBody = "grant_type=client_credentials&scope=api/access";
-        
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(TOKEN_URL))
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .header("Authorization", "Basic " + encodedAuth)
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
-        
+
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         if (response.statusCode() != 200) {
             throw new IOException("Failed to get access token: " + response.body());
         }
-        
+
         TokenInfo token = gson.fromJson(response.body(), TokenInfo.class);
         token.expires_at = Instant.now().getEpochSecond() + token.expires_in;
-        
+
         return token;
     }
-    
+
     // Example usage
     public static void main(String[] args) {
         try {
@@ -423,12 +424,12 @@ function isTokenExpired($token) {
 
 function ensureValidToken() {
     global $token_info, $CLIENT_ID, $CLIENT_SECRET, $TOKEN_URL;
-    
+
     if (isTokenExpired($token_info)) {
         echo "Getting new access token...\n";
         $token_info = getAccessToken($CLIENT_ID, $CLIENT_SECRET, $TOKEN_URL);
     }
-    
+
     return $token_info['access_token'];
 }
 
@@ -520,17 +521,17 @@ import requests
 def make_authenticated_request(endpoint, payload=None):
     """Make an authenticated API request."""
     token = ensure_valid_token()
-    
+
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
-    
+
     if payload:
         response = requests.post(endpoint, headers=headers, json=payload)
     else:
         response = requests.get(endpoint, headers=headers)
-    
+
     response.raise_for_status()
     return response.json()
 
@@ -547,14 +548,14 @@ result = make_authenticated_request(
 ```javascript JavaScript
 async function makeAuthenticatedRequest(endpoint, payload = null) {
     const token = await ensureValidToken();
-    
+
     const config = {
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         }
     };
-    
+
     if (payload) {
         const response = await axios.post(endpoint, payload, config);
         return response.data;
@@ -577,14 +578,14 @@ const result = await makeAuthenticatedRequest(
 ```typescript TypeScript
 async function makeAuthenticatedRequest(endpoint: string, payload?: any): Promise<any> {
     const token = await ensureValidToken();
-    
+
     const config = {
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         }
     };
-    
+
     if (payload) {
         const response = await axios.post(endpoint, payload, config);
         return response.data;
@@ -607,28 +608,28 @@ const result = await makeAuthenticatedRequest(
 ```php PHP
 function makeAuthenticatedRequest($endpoint, $payload = null) {
     $token = ensureValidToken();
-    
+
     $headers = [
         'Authorization: Bearer ' . $token,
         'Content-Type: application/json'
     ];
-    
+
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $endpoint);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    
+
     if ($payload) {
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
     }
-    
+
     $result = curl_exec($ch);
     if (curl_errno($ch)) {
         throw new Exception(curl_error($ch));
     }
     curl_close($ch);
-    
+
     return json_decode($result, true);
 }
 
@@ -648,28 +649,28 @@ func makeAuthenticatedRequest(endpoint string, payload []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var req *http.Request
 	if payload != nil {
 		req, err = http.NewRequest("POST", endpoint, bytes.NewBuffer(payload))
 	} else {
 		req, err = http.NewRequest("GET", endpoint, nil)
 	}
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	req.Header.Add("Authorization", "Bearer "+token)
 	req.Header.Add("Content-Type", "application/json")
-	
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	
+
 	return ioutil.ReadAll(resp.Body)
 }
 
@@ -688,25 +689,25 @@ result, err := makeAuthenticatedRequest(
 ```java Java
 public static String makeAuthenticatedRequest(String endpoint, String payload) throws IOException, InterruptedException {
     String token = ensureValidToken();
-    
+
     HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
             .uri(URI.create(endpoint))
             .header("Authorization", "Bearer " + token)
             .header("Content-Type", "application/json");
-    
+
     if (payload != null) {
         requestBuilder.POST(HttpRequest.BodyPublishers.ofString(payload));
     } else {
         requestBuilder.GET();
     }
-    
+
     HttpRequest request = requestBuilder.build();
     HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-    
+
     if (response.statusCode() != 200) {
         throw new IOException("API call failed: " + response.body());
     }
-    
+
     return response.body();
 }
 
@@ -777,11 +778,11 @@ def test_authentication():
         print(f"✓ Token retrieved successfully")
         print(f"  Token type: {token_info.get('token_type')}")
         print(f"  Expires in: {token_info.get('expires_in')} seconds")
-        
+
         # Test token validation
         token = ensure_valid_token()
         print(f"✓ Token validation successful")
-        
+
         return True
     except Exception as e:
         print(f"✗ Authentication failed: {e}")
@@ -799,11 +800,11 @@ async function testAuthentication() {
         console.log("✓ Token retrieved successfully");
         console.log(`  Token type: ${tokenInfo.token_type}`);
         console.log(`  Expires in: ${tokenInfo.expires_in} seconds`);
-        
+
         // Test token validation
         const token = await ensureValidToken();
         console.log("✓ Token validation successful");
-        
+
         return true;
     } catch (error) {
         console.error("✗ Authentication failed:", error.message);
@@ -822,11 +823,11 @@ async function testAuthentication(): Promise<boolean> {
         console.log("✓ Token retrieved successfully");
         console.log(`  Token type: ${tokenInfo.token_type}`);
         console.log(`  Expires in: ${tokenInfo.expires_in} seconds`);
-        
+
         // Test token validation
         const token = await ensureValidToken();
         console.log("✓ Token validation successful");
-        
+
         return true;
     } catch (error: any) {
         console.error("✗ Authentication failed:", error.message);
@@ -846,11 +847,11 @@ function testAuthentication() {
         echo "✓ Token retrieved successfully\n";
         echo "  Token type: " . $token_info['token_type'] . "\n";
         echo "  Expires in: " . $token_info['expires_in'] . " seconds\n";
-        
+
         // Test token validation
         $token = ensureValidToken();
         echo "✓ Token validation successful\n";
-        
+
         return true;
     } catch (Exception $e) {
         echo "✗ Authentication failed: " . $e->getMessage() . "\n";
@@ -864,25 +865,25 @@ testAuthentication();
 ```go Go
 func testAuthentication() bool {
 	fmt.Println("Testing authentication...")
-	
+
 	// Test token retrieval
 	tokenInfo, err := getAccessToken()
 	if err != nil {
 		fmt.Printf("✗ Authentication failed: %v\n", err)
 		return false
 	}
-	
+
 	fmt.Println("✓ Token retrieved successfully")
 	fmt.Printf("  Token type: %s\n", tokenInfo.TokenType)
 	fmt.Printf("  Expires in: %d seconds\n", tokenInfo.ExpiresIn)
-	
+
 	// Test token validation
 	token, err := ensureValidToken()
 	if err != nil {
 		fmt.Printf("✗ Token validation failed: %v\n", err)
 		return false
 	}
-	
+
 	fmt.Println("✓ Token validation successful")
 	return true
 }
@@ -900,11 +901,11 @@ public static boolean testAuthentication() {
         System.out.println("✓ Token retrieved successfully");
         System.out.println("  Token type: " + tokenInfo.token_type);
         System.out.println("  Expires in: " + tokenInfo.expires_in + " seconds");
-        
+
         // Test token validation
         String token = ensureValidToken();
         System.out.println("✓ Token validation successful");
-        
+
         return true;
     } catch (Exception e) {
         System.err.println("✗ Authentication failed: " + e.getMessage());

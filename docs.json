@@ -19,6 +19,7 @@
         "groups": [
           {
             "group": "Get Started",
+            "public": true,
             "pages": [
               "getting-started/overview",
               "getting-started/quickstart-admins",
@@ -28,6 +29,7 @@
           },
           {
             "group": "Platform Concepts",
+            "public": true,
             "pages": [
               "platform-concepts/overview",
               "platform-concepts/orgs-and-publishers",
@@ -36,6 +38,7 @@
           },
           {
             "group": "Studio User Guide",
+            "public": true,
             "pages": [
               "studio/overview",
               "studio/manage-organizations",
@@ -47,6 +50,7 @@
           },
           {
             "group": "Product Guides",
+            "public": true,
             "pages": [
               "product-guides/data-engine",
               "product-guides/chat",
@@ -56,6 +60,7 @@
           },
           {
             "group": "API Guides",
+            "public": true,
             "pages": [
               "api-guides/overview",
               "api-guides/ingestion",
@@ -75,6 +80,7 @@
           },
           {
             "group": "Learn More",
+            "public": true,
             "pages": [
               "learn-more/about-gloo-ai",
               "learn-more/open",
@@ -84,6 +90,7 @@
           },
           {
             "group": "External",
+            "public": true,
             "icon": "arrow-up-right-from-square",
             "pages": ["faithstack"]
           }
@@ -94,6 +101,7 @@
         "groups": [
           {
             "group": "General",
+            "public": true,
             "pages": [
               "api-reference/general/overview",
               "api-reference/general/errors",
@@ -102,10 +110,12 @@
           },
           {
             "group": "Models",
+            "public": true,
             "pages": ["api-reference/studio/get-models"]
           },
           {
             "group": "Chat",
+            "public": true,
             "pages": [
               "api-reference/chat/create-chat",
               "api-reference/chat/get-chat",
@@ -116,6 +126,7 @@
           },
           {
             "group": "Message",
+            "public": true,
             "pages": [
               "api-reference/chat/post-message",
               "api-reference/chat/update-message",
@@ -126,10 +137,12 @@
           },
           {
             "group": "Completions",
+            "public": true,
             "pages": ["api-reference/studio/post-completions"]
           },
           {
             "group": "Content",
+            "public": true,
             "pages": [
               "api-reference/ingestion/real-time-upload",
               "api-reference/core/search",
@@ -147,6 +160,7 @@
           },
           {
             "group": "Analytics",
+            "public": true,
             "pages": [
               "api-reference/sotc/analysis",
               "api-reference/sotc/church-metrics-ai-insights",
